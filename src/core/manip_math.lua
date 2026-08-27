@@ -22,9 +22,45 @@ local Y_FAR = { 0, 1.0, 2.0, -1.0 }
 local _peek_cache = {}
 local _neg_cache = {}
 local _jobs = {}
+local PRUNE_MS = 250
+local JOB_IDLE_MS = 2000
+local MAX_RESULTS = 256
+local MAX_JOBS = 128
+local last_prune = 0
 
 local function tick_ms()
     return utility and utility.get_tick_count and utility.get_tick_count() or 0
+end
+
+-- TTL checks on lookup do not release keys for positions never visited again.
+-- Keep active cursors, but release abandoned searches and expired results.
+function M.prune_caches()
+    local now = tick_ms()
+    if now >= last_prune and now - last_prune < PRUNE_MS then return end
+    last_prune = now
+    local function expire(entries, ttl)
+        for key, entry in pairs(entries) do
+            local age = now - (entry.last_used or entry.t or 0)
+            if age < 0 or age >= ttl then entries[key] = nil end
+        end
+    end
+    expire(_peek_cache, POS_CACHE_TTL_MS)
+    expire(_neg_cache, NEG_CACHE_TTL_MS)
+    expire(_jobs, JOB_IDLE_MS)
+end
+
+-- A hard bound also covers many requests in one tick or an unavailable clock.
+local function cache_put(entries, key, value, limit)
+    if not entries[key] then
+        local count, oldest_key, oldest_at = 0, nil, math.huge
+        for k, entry in pairs(entries) do
+            count = count + 1
+            local at = entry.last_used or entry.t or 0
+            if at < oldest_at then oldest_key, oldest_at = k, at end
+        end
+        if count >= limit and oldest_key then entries[oldest_key] = nil end
+    end
+    entries[key] = value
 end
 
 local function cache_key(origin, target_pos)
@@ -201,7 +237,10 @@ end
 
 local function ensure_job(key, origin, target_pos, base_r, max_r, extend, steps)
     local job = _jobs[key]
-    if job then return job end
+    if job then
+        job.last_used = tick_ms()
+        return job
+    end
     local radii = extend and build_radii(base_r, max_r) or { base_r }
     job = {
         key = key,
@@ -215,8 +254,9 @@ local function ensure_job(key, origin, target_pos, base_r, max_r, extend, steps)
         steps = steps or DEFAULT_STEPS,
         rays = 0,
         started = tick_ms(),
+        last_used = tick_ms(),
     }
-    _jobs[key] = job
+    cache_put(_jobs, key, job, MAX_JOBS)
     return job
 end
 
@@ -301,6 +341,7 @@ local function progress_of(job)
 end
 
 function M.evaluate_manipulation(origin, target_pos, opts)
+    M.prune_caches()
     opts = opts or {}
     local base_r = M.clamp_radius(opts.base_radius or opts.max_radius or 1)
     local extra = M.clamp_extend_extra(opts.extend_extra or 0)
@@ -371,7 +412,7 @@ function M.evaluate_manipulation(origin, target_pos, opts)
             local radius = job.radii[job.ri] or max_r
             local extended = extend and radius > base_r + 0.05
             if key then
-                _peek_cache[key] = { peek = peek, radius = radius, t = now }
+                cache_put(_peek_cache, key, { peek = peek, radius = radius, t = now }, MAX_RESULTS)
                 _neg_cache[key] = nil
             end
             clear_job(jkey)
@@ -383,7 +424,7 @@ function M.evaluate_manipulation(origin, target_pos, opts)
         end
         if done then
             if key then
-                _neg_cache[key] = { t = now, max_r = max_r }
+                cache_put(_neg_cache, key, { t = now, max_r = max_r }, MAX_RESULTS)
             end
             clear_job(jkey)
             return {
@@ -464,6 +505,7 @@ function M.clear_peek_cache()
     _peek_cache = {}
     _neg_cache = {}
     _jobs = {}
+    last_prune = 0
 end
 
 return M

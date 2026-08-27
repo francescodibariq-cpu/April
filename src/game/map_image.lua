@@ -20,6 +20,7 @@ M.OCEAN = { 0.55, 0.78, 0.90, 0.55 }
 local state = {
     place_id = nil,
     asset_id = nil,
+    resolved_asset_id = nil,
     path = nil,
     png_url = nil,
     handle = nil,
@@ -101,15 +102,15 @@ end
 
 function M.resolve_asset_id()
     local now = tick_ms()
-    if state.asset_id and (now - (state.last_resolve_ms or 0)) < 2000 then
-        return state.asset_id
+    if state.resolved_asset_id and (now - (state.last_resolve_ms or 0)) < 2000 then
+        return state.resolved_asset_id
     end
     state.last_resolve_ms = now
 
     local inst = resolve_map_image_inst()
     local raw = read_image_prop(inst)
     local id = asset_digits(raw) or M.DEFAULT_ASSET
-    state.asset_id = id
+    state.resolved_asset_id = id
     return id
 end
 
@@ -302,10 +303,13 @@ local function build_load_chain(path, asset_id, png_url)
     return chain
 end
 
+local function release_image(handle)
+    local free = draw and (draw.free_image or draw.FreeImage)
+    if handle and type(free) == "function" then pcall(free, handle) end
+end
+
 local function invalidate_handle()
-    if state.handle and draw and draw.free_image then
-        pcall(draw.free_image, state.handle)
-    end
+    release_image(state.handle)
     state.handle = nil
     state.ready = false
     state.failed = false
@@ -315,12 +319,8 @@ local function invalidate_handle()
 end
 
 local function invalidate_crops()
-    if draw and draw.free_image then
-        for _, crop in pairs(state.crops) do
-            if crop and crop.handle then
-                pcall(draw.free_image, crop.handle)
-            end
-        end
+    for _, crop in pairs(state.crops) do
+        release_image(crop.handle)
     end
     state.crops = {}
     state.active_crop = nil
@@ -335,6 +335,8 @@ function M.invalidate()
     state.path = nil
     state.png_url = nil
     state.asset_id = nil
+    state.resolved_asset_id = nil
+    state.last_resolve_ms = 0
     state.place_id = nil
 end
 
@@ -386,6 +388,7 @@ local function tick_load()
     if draw.image_failed and draw.image_failed(state.handle) then
         debug.warn_once("map_img:" .. tostring(state.load_url), "map load failed - " .. tostring(state.load_url))
         state.load_idx = state.load_idx + 1
+        release_image(state.handle)
         state.handle = nil
         return advance_load()
     end
@@ -406,12 +409,7 @@ function M.ensure()
 
     state.place_id = pid
     state.asset_id = asset_id
-    local path = M.cache_path(pid, asset_id)
-    state.path = path
-
-    if path and not file_is_image(path) then
-        pcall(os.remove, path)
-    end
+    local path = state.path
 
     -- After a hard failure, retry the whole fetch/load every 30s.
     if state.failed then
@@ -429,6 +427,12 @@ function M.ensure()
     end
 
     if not state.fetch_started then
+        -- Disk validation belongs to fetch/retry, not each ready()/draw() poll.
+        path = M.cache_path(pid, asset_id)
+        state.path = path
+        if path and not file_is_image(path) then
+            pcall(os.remove, path)
+        end
         state.fetch_started = true
         if file_exists(path) then
             state.fetch_done = true
@@ -572,8 +576,9 @@ local function crop_spec(view, map_rect)
 end
 
 local function free_crop(entry)
-    if entry and entry.handle and draw and draw.free_image then
-        pcall(draw.free_image, entry.handle)
+    if entry then
+        release_image(entry.handle)
+        entry.handle = nil
     end
     if state.active_crop == entry then state.active_crop = nil end
 end

@@ -1,6 +1,6 @@
 # April Fallen — Agent Guide (Vector / Fallen Survival)
 
-Read this at the start of every session.
+Read this at the start of every session. For the full runtime map see **`docs/ARCHITECTURE.md`**.
 
 ## What this project is
 
@@ -14,9 +14,12 @@ Read this at the start of every session.
 | `load.lua` | Public one-line `utility.LoadUrl(...)` |
 | `Script 1.lua` | Identical full local bundle for pre-release testing |
 | `dump/` | Game dump (gitignored — local only) |
-| `tools/` | GC / rbxlx utilities (local workspace) |
+| `tools/` | GC / i18n / dump utilities (local workspace) |
 | `docs/API.md` | Vector Lua Engine API — read every session |
+| `docs/ARCHITECTURE.md` | Boot, frame loop, menu, source map |
 | `src/ui/` | Gamesense custom UI (wired to features via `menu_shim`) |
+| `src/ui/catalog_*.lua` | Per-tab menu layouts |
+| `src/ui/template/` | Standalone UI kit (not in the game bundle) |
 
 **Build:** `npm run build`
 

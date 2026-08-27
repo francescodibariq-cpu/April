@@ -312,7 +312,7 @@ FOV, chams, and any memory-backed setting.
 ## Per-feature definition of done
 
 - Feature is modular under `src/features/` and registered in `menu/tabs.lua`.
-- UI state is represented in `src/ui/catalog.lua` and connected through the
+- UI state is represented in `src/ui/catalog_*.lua` and connected through the
   existing menu shim/feature-bind path.
 - All source paths are included by `scripts/bundle.mjs`.
 - Disabled state has no persistent world, GC, visual, or environment changes.

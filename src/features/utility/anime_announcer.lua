@@ -697,18 +697,8 @@ function M.install()
     installed = true
     session_key = session_id()
     pcall(data.load_remote)
-    for _, character in ipairs(data.characters) do
-        local seen = {}
-        for expression, file in pairs(character.expressions or {}) do
-            if not seen[file] then
-                seen[file] = true
-                image_cache.preload(
-                    "anime_baddie:" .. character.id .. ":" .. tostring(file),
-                    character.urls(expression)
-                )
-            end
-        end
-    end
+    -- activate()/draw() load the selected sprite on demand. Preloading every
+    -- character here retained textures even with the announcer disabled.
 end
 
 function M.register_menu()

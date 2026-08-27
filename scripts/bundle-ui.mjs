@@ -14,15 +14,26 @@ const SRC = path.join(ROOT, "src");
 const OUT = path.join(ROOT, "april_ui.lua");
 
 const ORDER = [
+  "core/env.lua",
+  "core/settings.lua",
   "game/esp_maps.lua",
+  "core/gpu_chams.lua",
   "ui/combat_labels.lua",
   "ui/gs_theme.lua",
   "ui/gs_input.lua",
   "ui/gs_state.lua",
   "ui/gs_widgets.lua",
+  "ui/catalog_items.lua",
+  "ui/catalog_aim.lua",
+  "ui/catalog_visuals.lua",
+  "ui/catalog_world.lua",
+  "ui/catalog_guns.lua",
+  "ui/catalog_misc.lua",
+  "ui/catalog_radar.lua",
+  "ui/catalog_config.lua",
   "ui/catalog.lua",
   "ui/custom_menu.lua",
-  "ui/standalone_app.lua",
+  "ui/template/standalone_app.lua",
 ];
 
 const header = `--[[
@@ -53,7 +64,7 @@ end
 const footer = `
 do
     local ok, err = pcall(function()
-        local app = April.require("ui.standalone_app")
+        local app = April.require("ui.template.standalone_app")
         if not app.init() then
             print("[April UI] init failed")
             return

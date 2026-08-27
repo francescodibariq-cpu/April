@@ -14,6 +14,9 @@ const OUT = path.join(ROOT, "april.lua");
 const LOAD_OUT = path.join(ROOT, "load.lua");
 const SCRIPT1_OUT = path.join(ROOT, "Script 1.lua");
 
+// Load order is dependency-sensitive: modules run as they are wrapped.
+// Do not regroup by folder — e.g. ui_theme requires game.mod_ids, image_cache
+// requires game.asset_urls. Template UI lives in src/ui/template/ (not bundled).
 const ORDER = [
   "core/env.lua",
   "core/api_aliases.lua",
@@ -122,6 +125,7 @@ const ORDER = [
   "features/radar/tactical_map.lua",
   "features/utility/keybind_viewer.lua",
   "features/utility/anti_afk.lua",
+  "features/utility/card_doors.lua",
   "features/utility/anime_announcer.lua",
   "features/utility/config.lua",
   "ui/gs_theme.lua",
@@ -133,6 +137,14 @@ const ORDER = [
   "ui/menu_shim.lua",
   "ui/gs_icons.lua",
   "ui/gs_widgets.lua",
+  "ui/catalog_items.lua",
+  "ui/catalog_aim.lua",
+  "ui/catalog_visuals.lua",
+  "ui/catalog_world.lua",
+  "ui/catalog_guns.lua",
+  "ui/catalog_misc.lua",
+  "ui/catalog_radar.lua",
+  "ui/catalog_config.lua",
   "ui/catalog.lua",
   "ui/hud_dock.lua",
   "ui/menu_fx.lua",
@@ -142,7 +154,25 @@ const ORDER = [
   "app.lua",
 ];
 
-const VERSION = "4.3.0";
+function listLuaFiles(dir, acc = []) {
+  for (const name of fs.readdirSync(dir)) {
+    const full = path.join(dir, name);
+    if (fs.statSync(full).isDirectory()) {
+      listLuaFiles(full, acc);
+    } else if (name.endsWith(".lua")) {
+      acc.push(path.relative(SRC, full).split(path.sep).join("/"));
+    }
+  }
+  return acc;
+}
+
+const orderSet = new Set(ORDER);
+const orphanSrc = listLuaFiles(SRC).filter((rel) => !orderSet.has(rel) && !rel.startsWith("ui/template/"));
+if (orphanSrc.length) {
+  console.warn("src/ Lua files not in bundle ORDER:\n  " + orphanSrc.join("\n  "));
+}
+
+const VERSION = "4.3.2";
 
 const header = `--[[
     April Fallen - Fallen Survival for Project Vector
@@ -297,7 +327,7 @@ function buildModuleBody(files, fullBundle = false) {
       || (fullBundle && rel === "ui/gs_input.lua")
       || (fullBundle && rel === "ui/gs_state.lua")
       || rel === "ui/custom_menu.lua"
-      || rel === "ui/catalog.lua";
+      || rel.startsWith("ui/catalog");
     const src = compactLuaSource(fs.readFileSync(full, "utf8"), stripIndent);
     body += `\nApril._mods["${modPath}"] = (function()\n${src}\nend)()\n`;
   }

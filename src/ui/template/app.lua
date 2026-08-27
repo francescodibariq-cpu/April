@@ -2,7 +2,7 @@
   April UI template entry.
 
   This file boots the Gamesense draw menu with the TEMPLATE catalog only.
-  There are no game features here — copy groups from template_catalog.lua
+  There are no game features here — copy groups from ui/template/catalog.lua
   and hook gs_state reads in on_frame() (examples below).
 ]]
 
@@ -53,8 +53,8 @@ function M.init()
     wire_demo_callbacks()
 
     print("[April UI] template ready — INSERT toggles the menu")
-    print("[April UI] edit template_catalog.lua (bundled as ui.catalog) then rebuild:")
-    print("[April UI]   node scripts/bundle-april-ui.mjs")
+    print("[April UI] edit src/ui/template/catalog.lua (bundled as ui.catalog) then rebuild:")
+    print("[April UI]   npm run build:ui-template")
     return true
 end
 

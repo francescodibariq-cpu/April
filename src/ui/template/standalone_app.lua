@@ -1,4 +1,5 @@
 -- Entry for the Gamesense UI demo only (no features, no Vector menu registration).
+-- Used by `npm run build:ui` which ships the real April catalog without game features.
 local custom_menu = April.require("ui.custom_menu")
 
 local M = {}

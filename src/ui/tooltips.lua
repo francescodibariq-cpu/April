@@ -184,6 +184,7 @@ M.BY_ID = {
     april_farm_helper = "Manual alternative to Autofarm. It redirects your held melee swings to the nearest compatible weak point, but you move and hold attack yourself.",
     april_ui_russian = "Switches the entire April menu and HUD text to Russian (Latin spelling — Vector's font cannot draw Cyrillic).",
     april_anti_afk = "Prevents idle kick by simulating activity.",
+    april_card_doors_enabled = "Sets InteractDistance to 5 studs and refreshes cached entries every 3 seconds. Pick a key on the chip. WARNING: Vector patches every matching field, including other doors and benches. Disabling sets all matches to 0, not their original distances. Server checks may still reject interaction.",
     april_mod_checker_enabled = "Alerts you when staff or mods join the server.",
     april_keybinds_enabled = "Shows an on-screen list of your keybinds.",
     april_event_status_enabled = "Shows live timed crates, event NPCs, and bosses. BTR tracks the 13-minute loot-fire cooldown after destroy (raids use Raid ESP only).",

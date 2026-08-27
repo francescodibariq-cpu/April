@@ -168,7 +168,9 @@ function M.apply_weapon(mods, opts)
         return false, 0, "throttled"
     end
 
-    maybe_refresh(opts.force_refresh == true or M._last_node_count <= 0)
+    -- Record attempts too: failed warmups must honor the existing apply gap.
+    M._last_apply_ms = now
+    maybe_refresh(opts.force_refresh == true)
 
     local patch_keys = keys_for_payload(payload)
     local warm = warm_nodes(patch_keys)
@@ -193,7 +195,7 @@ function M.apply_weapon(mods, opts)
     end
 
     local patched = 0
-    local ok, result = pcall(applygc, patch_keys, payload)
+    local ok, result = pcall(applygc, payload)
     if ok and type(result) == "number" then
         patched = result
     elseif not ok then

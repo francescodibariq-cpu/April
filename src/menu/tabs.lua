@@ -17,26 +17,30 @@ M._update_dispatch = {}
 M._draw_dispatch = {}
 
 M.FEATURE_ORDER = {
+    -- Combat (thick_bullet before silent/TP so Override Size is live for aim math)
     "features.combat.camera_aimbot",
-    -- Inflate heads before silent/TP resolve so Override Size is live for aim math.
     "features.combat.thick_bullet",
     "features.combat.aimbot",
     "features.combat.fov_flags",
     "features.combat.body_peek",
     "features.combat.gun_mods",
+    -- Visuals
     "features.visuals.bullet_tracers",
     "features.visuals.target_overlay",
     "features.visuals.target_visuals",
     "features.visuals.player_esp",
     "features.visuals.sound_esp",
+    -- World
     "features.world.world_esp",
     "features.world.loot_esp",
     "features.world.npc_esp",
     "features.world.raid_esp",
     "features.world.base_esp",
     "features.world.base_xray",
+    -- Radar
     "features.radar.tactical_map",
     "features.radar.waypoints",
+    -- Movement
     "features.movement.exploits",
     "features.movement.bhop",
     "features.movement.desync",
@@ -44,11 +48,13 @@ M.FEATURE_ORDER = {
     "features.movement.fake_duck",
     "features.movement.fling",
     "features.movement.anti_fling",
+    -- Utility
     "features.combat.perfect_farm",
     "features.utility.autofarm",
     "features.utility.mod_checker",
     "features.utility.event_status",
     "features.utility.anti_afk",
+    "features.utility.card_doors",
     "features.utility.keybind_viewer",
     "features.utility.anime_announcer",
     "features.utility.config",

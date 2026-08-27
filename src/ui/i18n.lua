@@ -455,6 +455,7 @@ local STRINGS = {
     ["Manual Farm Helper"] = "Ruchnoy pomoschnik farma",
     ["Farm Range (studs)"] = "Dalnost farma (studs)",
     ["Anti AFK"] = "Anti-AFK",
+    ["Open card doors"] = "Otkryvat dveri s kartoy",
     ["Anti Fling"] = "Anti-fling",
 
     -- Radar / waypoints
@@ -786,6 +787,7 @@ local TIPS = {
     april_autofarm_debug_path = "Risuet trasser k tochnoy tochke TreeX ili NodeSpark plyus tekuschee sostoyanie, distantsiyu i instrument v rukah.",
     april_farm_helper = "Ruchnaya alternativa avtofarmu. Perenapravlyaet udary mili na blizhayshuyu sovmestimuyu weak point, no dvigaetes i derzhite ataku sami.",
     april_anti_afk = "Predotvraschaet kik za prostoy, imitiruya aktivnost.",
+    april_card_doors_enabled = "Stavit InteractDistance na 5 i obnovlyaet kesh kazhdye 3 sekundy. Vyberite klavishu. VNIMANIE: menyayutsya vse polya s etim imenem, vklyuchaya drugie dveri i verstaki. Pri vyklyuchenii stavitsya 0, a ne ishodnye distantsii. Server mozhet otklonit deystvie.",
     april_mod_checker_enabled = "Preduprezhdaet, kogda personal ili mody zahodyat na server.",
     april_keybinds_enabled = "Pokazyvaet na ekrane spisok vashih bindov.",
     april_event_status_enabled = "Pokazyvaet zhivye timed crates, iventovyh NPC i bossov. BTR trekaet 13-minutnyy kuldaun luta posle unichtozheniya (reydy — tolko cherez Raid ESP).",

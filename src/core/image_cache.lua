@@ -14,6 +14,9 @@ local keys = {}
 local RETRY_MS = 5000
 local MAX_ENTRIES = 384
 local key_count = 0
+local handle_refs = {}
+local IDLE_MS = 60000
+local last_prune = 0
 
 local function tick_ms()
     local fn = utility and (utility.get_tick_count or utility.GetTickCount)
@@ -41,14 +44,34 @@ end
 
 local function is_pinned(key)
     return key == "startup_author_profile"
-        or tostring(key):find("^anime_baddie:") ~= nil
 end
 
 local function free_handle(entry)
     if not entry or not entry.handle then return end
-    local fn = draw and (draw.free_image or draw.FreeImage)
-    if type(fn) == "function" then pcall(fn, entry.handle) end
+    local handle = entry.handle
+    local refs = (handle_refs[handle] or 1) - 1
+    if refs > 0 then
+        handle_refs[handle] = refs
+    else
+        handle_refs[handle] = nil
+        local fn = draw and (draw.free_image or draw.FreeImage)
+        if type(fn) == "function" then pcall(fn, handle) end
+    end
     entry.handle = nil
+end
+
+function M.prune()
+    local now = tick_ms()
+    if now >= last_prune and now - last_prune < 1000 then return end
+    last_prune = now
+    for key, entry in pairs(keys) do
+        local age = now - (entry.last_used or 0)
+        if not is_pinned(key) and (age < 0 or age >= IDLE_MS) then
+            free_handle(entry)
+            keys[key] = nil
+            key_count = key_count - 1
+        end
+    end
 end
 
 local function evict_cold()
@@ -158,6 +181,8 @@ local function get_handle(key)
         local ok, handle = pcall(draw.load_image, entry.url)
         if ok and handle then
             entry.handle = handle
+            -- LoadImage deduplicates by URL; several keys can own one handle.
+            handle_refs[handle] = (handle_refs[handle] or 0) + 1
         else
             if try_fallback(entry) then return nil end
             debug.warn_once("img:" .. key, "load failed - " .. tostring(entry.url))

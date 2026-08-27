@@ -33,12 +33,15 @@ After push, `utility.LoadUrl(...)` serves the new build.
 
 | Path | Purpose |
 |------|---------|
-| `april.lua` | Full remote runtime executed by the one-line LoadUrl |
-| `Script 1.lua` | Identical local test copy of the full runtime |
+| `src/` | Modular source — **edit here** |
+| `docs/ARCHITECTURE.md` | How boot, frame loop, menu, and features fit together |
+| `docs/API.md` | Vector Lua API |
+| `april.lua` | Generated remote runtime |
+| `Script 1.lua` | Identical local test copy of the runtime |
 | `load.lua` | Same one-line LoadUrl shown above |
-| `src/` | Modular source |
-| `scripts/` | Bundle tools |
-| `docs/` | API notes |
+| `scripts/` | Bundle, dump, and asset tools |
+| `src/ui/catalog_*.lua` | Per-tab custom-menu layouts |
+| `src/ui/template/` | Standalone UI kit (no game features) |
 
 **Local only (gitignored):** `dump/`, `RE/`, `node_modules/`
 

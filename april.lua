@@ -1,5 +1,5 @@
 April = {
-    version = "4.3.0",
+    version = "4.3.2",
     debug = false,
     crash_logging = false,
     crash_trace = false,
@@ -3102,6 +3102,9 @@ local keys = {}
 local RETRY_MS = 5000
 local MAX_ENTRIES = 384
 local key_count = 0
+local handle_refs = {}
+local IDLE_MS = 60000
+local last_prune = 0
 local function tick_ms()
 local fn = utility and (utility.get_tick_count or utility.GetTickCount)
 if type(fn) ~= "function" then return 0 end
@@ -3125,13 +3128,32 @@ return tostring(asset_id_or_url):match("(%d+)$") or tostring(asset_id_or_url):ma
 end
 local function is_pinned(key)
 return key == "startup_author_profile"
-or tostring(key):find("^anime_baddie:") ~= nil
 end
 local function free_handle(entry)
 if not entry or not entry.handle then return end
+local handle = entry.handle
+local refs = (handle_refs[handle] or 1) - 1
+if refs > 0 then
+handle_refs[handle] = refs
+else
+handle_refs[handle] = nil
 local fn = draw and (draw.free_image or draw.FreeImage)
-if type(fn) == "function" then pcall(fn, entry.handle) end
+if type(fn) == "function" then pcall(fn, handle) end
+end
 entry.handle = nil
+end
+function M.prune()
+local now = tick_ms()
+if now >= last_prune and now - last_prune < 1000 then return end
+last_prune = now
+for key, entry in pairs(keys) do
+local age = now - (entry.last_used or 0)
+if not is_pinned(key) and (age < 0 or age >= IDLE_MS) then
+free_handle(entry)
+keys[key] = nil
+key_count = key_count - 1
+end
+end
 end
 local function evict_cold()
 while key_count >= MAX_ENTRIES do
@@ -3230,6 +3252,7 @@ if not entry.handle then
 local ok, handle = pcall(draw.load_image, entry.url)
 if ok and handle then
 entry.handle = handle
+handle_refs[handle] = (handle_refs[handle] or 0) + 1
 else
 if try_fallback(entry) then return nil end
 debug.warn_once("img:" .. key, "load failed - " .. tostring(entry.url))
@@ -4585,7 +4608,7 @@ function M.register_keybind(T, G, id, label, default, extra)
     menu.add_checkbox(T, G, id, label, default or false, cb_opts)
     local mode_id = id .. "_mode"
     local mode_label = label .. " Bind Mode"
-    menu.add_combo(T, G, mode_id, mode_label, { "Always", "Hold", "Toggle" }, 0, M.parent(id))
+    menu.add_combo(T, G, mode_id, mode_label, { "Always", "Hold", "Toggle" }, extra.default_mode or 0, M.parent(id))
     April.require("core.feature_bind").register({
         id = id,
         label = label,
@@ -5432,8 +5455,39 @@ local Y_FAR = { 0, 1.0, 2.0, -1.0 }
 local _peek_cache = {}
 local _neg_cache = {}
 local _jobs = {}
+local PRUNE_MS = 250
+local JOB_IDLE_MS = 2000
+local MAX_RESULTS = 256
+local MAX_JOBS = 128
+local last_prune = 0
 local function tick_ms()
 return utility and utility.get_tick_count and utility.get_tick_count() or 0
+end
+function M.prune_caches()
+local now = tick_ms()
+if now >= last_prune and now - last_prune < PRUNE_MS then return end
+last_prune = now
+local function expire(entries, ttl)
+for key, entry in pairs(entries) do
+local age = now - (entry.last_used or entry.t or 0)
+if age < 0 or age >= ttl then entries[key] = nil end
+end
+end
+expire(_peek_cache, POS_CACHE_TTL_MS)
+expire(_neg_cache, NEG_CACHE_TTL_MS)
+expire(_jobs, JOB_IDLE_MS)
+end
+local function cache_put(entries, key, value, limit)
+if not entries[key] then
+local count, oldest_key, oldest_at = 0, nil, math.huge
+for k, entry in pairs(entries) do
+count = count + 1
+local at = entry.last_used or entry.t or 0
+if at < oldest_at then oldest_key, oldest_at = k, at end
+end
+if count >= limit and oldest_key then entries[oldest_key] = nil end
+end
+entries[key] = value
 end
 local function cache_key(origin, target_pos)
 if not origin or not target_pos then return nil end
@@ -5587,7 +5641,10 @@ return ck .. string.format("|%.2f:%.2f:%d", base_r, max_r, extend and 1 or 0)
 end
 local function ensure_job(key, origin, target_pos, base_r, max_r, extend, steps)
 local job = _jobs[key]
-if job then return job end
+if job then
+job.last_used = tick_ms()
+return job
+end
 local radii = extend and build_radii(base_r, max_r) or { base_r }
 job = {
 key = key,
@@ -5601,8 +5658,9 @@ ai = 0,
 steps = steps or DEFAULT_STEPS,
 rays = 0,
 started = tick_ms(),
+last_used = tick_ms(),
 }
-_jobs[key] = job
+cache_put(_jobs, key, job, MAX_JOBS)
 return job
 end
 local function clear_job(key)
@@ -5678,6 +5736,7 @@ if total <= 0 then return 1 end
 return math.min(1, (job.ri - 1) / total)
 end
 function M.evaluate_manipulation(origin, target_pos, opts)
+M.prune_caches()
 opts = opts or {}
 local base_r = M.clamp_radius(opts.base_radius or opts.max_radius or 1)
 local extra = M.clamp_extend_extra(opts.extend_extra or 0)
@@ -5740,7 +5799,7 @@ clamp_peek_y(peek, origin)
 local radius = job.radii[job.ri] or max_r
 local extended = extend and radius > base_r + 0.05
 if key then
-_peek_cache[key] = { peek = peek, radius = radius, t = now }
+cache_put(_peek_cache, key, { peek = peek, radius = radius, t = now }, MAX_RESULTS)
 _neg_cache[key] = nil
 end
 clear_job(jkey)
@@ -5752,7 +5811,7 @@ scan_progress = 1, rays = used,
 end
 if done then
 if key then
-_neg_cache[key] = { t = now, max_r = max_r }
+cache_put(_neg_cache, key, { t = now, max_r = max_r }, MAX_RESULTS)
 end
 clear_job(jkey)
 return {
@@ -5824,6 +5883,7 @@ function M.clear_peek_cache()
 _peek_cache = {}
 _neg_cache = {}
 _jobs = {}
+last_prune = 0
 end
 return M
 end)()
@@ -7179,6 +7239,7 @@ local MENU_KEYS = {
     "april_npc_show_name", "april_npc_show_distance", "april_npc_range",
     "april_raid_enabled", "april_raid_enabled_mode", "april_raid_notifications", "april_raid_range",
     "april_anti_afk",
+    "april_card_doors_enabled", "april_card_doors_enabled_mode",
     "april_base_enabled", "april_base_enabled_mode", "april_base_cabinet", "april_storage_cabinet", "april_small_box", "april_large_box",
     "april_sleeping_bag", "april_auto_turret", "april_auto_turret_ring", "april_shotgun_turret", "april_shotgun_turret_ring",
     "april_wooden_door", "april_wooden_double_door", "april_salvaged_door", "april_metal_door",
@@ -7271,6 +7332,7 @@ local LEGACY_HOTKEY_TO_CHECKBOX = {
     april_mod_checker_enabled_key = "april_mod_checker_enabled",
 }
 local HOTKEY_KEYS = {
+    "april_card_doors_enabled",
     "april_gunmods_enabled",
     "april_autofarm",
     "april_farm_helper",
@@ -10600,7 +10662,8 @@ function M.apply_weapon(mods, opts)
     if not opts.force and (now - M._last_apply_ms) < gap then
         return false, 0, "throttled"
     end
-    maybe_refresh(opts.force_refresh == true or M._last_node_count <= 0)
+    M._last_apply_ms = now
+    maybe_refresh(opts.force_refresh == true)
     local patch_keys = keys_for_payload(payload)
     local warm = warm_nodes(patch_keys)
     M._last_node_count = math.max(M._last_node_count, warm)
@@ -10618,7 +10681,7 @@ function M.apply_weapon(mods, opts)
         end
     end
     local patched = 0
-    local ok, result = pcall(applygc, patch_keys, payload)
+    local ok, result = pcall(applygc, payload)
     if ok and type(result) == "number" then
         patched = result
     elseif not ok then
@@ -15310,6 +15373,7 @@ M.OCEAN = { 0.55, 0.78, 0.90, 0.55 }
 local state = {
 place_id = nil,
 asset_id = nil,
+resolved_asset_id = nil,
 path = nil,
 png_url = nil,
 handle = nil,
@@ -15381,14 +15445,14 @@ return find_child(frame, "Map")
 end
 function M.resolve_asset_id()
 local now = tick_ms()
-if state.asset_id and (now - (state.last_resolve_ms or 0)) < 2000 then
-return state.asset_id
+if state.resolved_asset_id and (now - (state.last_resolve_ms or 0)) < 2000 then
+return state.resolved_asset_id
 end
 state.last_resolve_ms = now
 local inst = resolve_map_image_inst()
 local raw = read_image_prop(inst)
 local id = asset_digits(raw) or M.DEFAULT_ASSET
-state.asset_id = id
+state.resolved_asset_id = id
 return id
 end
 local function maps_dir()
@@ -15553,10 +15617,12 @@ add(resolve_png_url(asset_id))
 add(asset_urls.map_png(asset_id))
 return chain
 end
-local function invalidate_handle()
-if state.handle and draw and draw.free_image then
-pcall(draw.free_image, state.handle)
+local function release_image(handle)
+local free = draw and (draw.free_image or draw.FreeImage)
+if handle and type(free) == "function" then pcall(free, handle) end
 end
+local function invalidate_handle()
+release_image(state.handle)
 state.handle = nil
 state.ready = false
 state.failed = false
@@ -15565,12 +15631,8 @@ state.load_chain = nil
 state.load_url = nil
 end
 local function invalidate_crops()
-if draw and draw.free_image then
 for _, crop in pairs(state.crops) do
-if crop and crop.handle then
-pcall(draw.free_image, crop.handle)
-end
-end
+release_image(crop.handle)
 end
 state.crops = {}
 state.active_crop = nil
@@ -15584,6 +15646,8 @@ state.next_retry_ms = 0
 state.path = nil
 state.png_url = nil
 state.asset_id = nil
+state.resolved_asset_id = nil
+state.last_resolve_ms = 0
 state.place_id = nil
 end
 local function begin_load(path, asset_id, png_url)
@@ -15629,6 +15693,7 @@ end
 if draw.image_failed and draw.image_failed(state.handle) then
 debug.warn_once("map_img:" .. tostring(state.load_url), "map load failed - " .. tostring(state.load_url))
 state.load_idx = state.load_idx + 1
+release_image(state.handle)
 state.handle = nil
 return advance_load()
 end
@@ -15646,11 +15711,7 @@ M.invalidate()
 end
 state.place_id = pid
 state.asset_id = asset_id
-local path = M.cache_path(pid, asset_id)
-state.path = path
-if path and not file_is_image(path) then
-pcall(os.remove, path)
-end
+local path = state.path
 if state.failed then
 local now = tick_ms()
 if now < (state.next_retry_ms or 0) then
@@ -15665,6 +15726,11 @@ state.load_chain = nil
 debug.warn_once("map_img:retry", "retrying world map load")
 end
 if not state.fetch_started then
+path = M.cache_path(pid, asset_id)
+state.path = path
+if path and not file_is_image(path) then
+pcall(os.remove, path)
+end
 state.fetch_started = true
 if file_exists(path) then
 state.fetch_done = true
@@ -15787,8 +15853,9 @@ spec.key = crop_key(spec)
 return spec
 end
 local function free_crop(entry)
-if entry and entry.handle and draw and draw.free_image then
-pcall(draw.free_image, entry.handle)
+if entry then
+release_image(entry.handle)
+entry.handle = nil
 end
 if state.active_crop == entry then state.active_crop = nil end
 end
@@ -29470,6 +29537,73 @@ function M.draw() end
 return M
 end)()
 
+April._mods["features.utility.card_doors"] = (function()
+local settings = April.require("core.settings")
+local menu_util = April.require("core.menu_util")
+local notify = April.require("core.notify")
+local M = {}
+local P = "april_card_doors_enabled"
+local KEY = "InteractDistance"
+local DISTANCE = 5
+local REFRESH_MS = 3000
+local was_enabled = false
+local attempted = false
+local next_refresh = 0
+local notice_state = nil
+local function now_ms()
+    local fn = utility and (utility.get_tick_count or utility.GetTickCount)
+    return type(fn) == "function" and fn() or 0
+end
+local function report(state, message, kind)
+    if notice_state == state then return end
+    notice_state = state
+    notify.toast(message, kind, 2500, true)
+end
+local function patch(fn, value)
+    local ok, count = pcall(fn, KEY, value)
+    return ok and type(count) == "number" and count > 0
+end
+function M.register_menu()
+    local G = menu_util.G.MISC
+    menu_util.register_keybind(menu_util.group(G), G, P, "Open card doors", false,
+        { key = 0, default_mode = 2 })
+end
+function M.update(_dt)
+    local enabled = settings.enabled(P)
+    local changed = enabled ~= was_enabled
+    if changed then
+        was_enabled = enabled
+        notice_state = nil
+    end
+    if not enabled then
+        if changed and attempted then
+            if type(setgc) == "function" and patch(setgc, 0) then
+                attempted = false
+                report("reset", "Interaction distance reset to 0.", "warning")
+            else
+                report("reset_failed", "Interaction reset failed; the previous patch may remain.", "danger")
+            end
+        end
+        return
+    end
+    local now = now_ms()
+    if not changed and now < next_refresh then return end
+    next_refresh = now + REFRESH_MS
+    if type(setgc) ~= "function" or type(applygc) ~= "function" then
+        report("unavailable", "Card-door interaction requires Vector's GC API.", "danger")
+        return
+    end
+    attempted = true
+    local fn = changed and setgc or applygc
+    if patch(fn, DISTANCE) then
+        report("applied", "Card-door reach set to 5 studs.", "success")
+    else
+        report("pending", "No interaction patch confirmed; approach a card door and retry.", "warning")
+    end
+end
+return M
+end)()
+
 April._mods["features.utility.anime_announcer"] = (function()
 local settings = April.require("core.settings")
 local menu_util = April.require("core.menu_util")
@@ -30097,18 +30231,6 @@ if installed then return end
 installed = true
 session_key = session_id()
 pcall(data.load_remote)
-for _, character in ipairs(data.characters) do
-local seen = {}
-for expression, file in pairs(character.expressions or {}) do
-if not seen[file] then
-seen[file] = true
-image_cache.preload(
-"anime_baddie:" .. character.id .. ":" .. tostring(file),
-character.urls(expression)
-)
-end
-end
-end
 end
 function M.register_menu()
 M.install()
@@ -31992,6 +32114,7 @@ local STRINGS = {
     ["Manual Farm Helper"] = "Ruchnoy pomoschnik farma",
     ["Farm Range (studs)"] = "Dalnost farma (studs)",
     ["Anti AFK"] = "Anti-AFK",
+    ["Open card doors"] = "Otkryvat dveri s kartoy",
     ["Anti Fling"] = "Anti-fling",
     ["Visible Layers"] = "Vidimye sloi",
     ["NPCs"] = "NPC",
@@ -32298,6 +32421,7 @@ local TIPS = {
     april_autofarm_debug_path = "Risuet trasser k tochnoy tochke TreeX ili NodeSpark plyus tekuschee sostoyanie, distantsiyu i instrument v rukah.",
     april_farm_helper = "Ruchnaya alternativa avtofarmu. Perenapravlyaet udary mili na blizhayshuyu sovmestimuyu weak point, no dvigaetes i derzhite ataku sami.",
     april_anti_afk = "Predotvraschaet kik za prostoy, imitiruya aktivnost.",
+    april_card_doors_enabled = "Stavit InteractDistance na 5 i obnovlyaet kesh kazhdye 3 sekundy. Vyberite klavishu. VNIMANIE: menyayutsya vse polya s etim imenem, vklyuchaya drugie dveri i verstaki. Pri vyklyuchenii stavitsya 0, a ne ishodnye distantsii. Server mozhet otklonit deystvie.",
     april_mod_checker_enabled = "Preduprezhdaet, kogda personal ili mody zahodyat na server.",
     april_keybinds_enabled = "Pokazyvaet na ekrane spisok vashih bindov.",
     april_event_status_enabled = "Pokazyvaet zhivye timed crates, iventovyh NPC i bossov. BTR trekaet 13-minutnyy kuldaun luta posle unichtozheniya (reydy — tolko cherez Raid ESP).",
@@ -32724,6 +32848,7 @@ april_autofarm_debug_path = "Draws a tracer to the exact TreeX or NodeSpark poin
 april_farm_helper = "Manual alternative to Autofarm. It redirects your held melee swings to the nearest compatible weak point, but you move and hold attack yourself.",
 april_ui_russian = "Switches the entire April menu and HUD text to Russian (Latin spelling — Vector's font cannot draw Cyrillic).",
 april_anti_afk = "Prevents idle kick by simulating activity.",
+april_card_doors_enabled = "Sets InteractDistance to 5 studs and refreshes cached entries every 3 seconds. Pick a key on the chip. WARNING: Vector patches every matching field, including other doors and benches. Disabling sets all matches to 0, not their original distances. Server checks may still reject interaction.",
 april_mod_checker_enabled = "Alerts you when staff or mods join the server.",
 april_keybinds_enabled = "Shows an on-screen list of your keybinds.",
 april_event_status_enabled = "Shows live timed crates, event NPCs, and bosses. BTR tracks the 13-minute loot-fire cooldown after destroy (raids use Raid ESP only).",
@@ -34930,26 +35055,24 @@ end
 return M
 end)()
 
-April._mods["ui.catalog"] = (function()
-local maps = April.require("game.esp_maps")
-local combat_menu = April.require("ui.combat_labels")
+April._mods["ui.catalog_items"] = (function()
 local gpu_chams = April.require("core.gpu_chams")
 local M = {}
-local function cb(id, label, default, color, gate, extra)
+function M.cb(id, label, default, color, gate, extra)
 local item = { type = "checkbox", id = id, label = label, default = default == true, color = color, gate = gate }
 if type(extra) == "table" then
 for k, v in pairs(extra) do item[k] = v end
 end
 return item
 end
-local function kb(id, label, default, gate, extra)
+function M.kb(id, label, default, gate, extra)
 local item = { type = "keybind", id = id, label = label, default = default == true, gate = gate }
 if type(extra) == "table" then
 for k, v in pairs(extra) do item[k] = v end
 end
 return item
 end
-local function sl(id, label, minv, maxv, default, float, gate, extra)
+function M.sl(id, label, minv, maxv, default, float, gate, extra)
 local item = {
 type = "slider",
 id = id,
@@ -34968,7 +35091,7 @@ end
 end
 return item
 end
-local function combo(id, label, options, default, gate, extra)
+function M.combo(id, label, options, default, gate, extra)
 local item = { type = "combo", id = id, label = label, options = options, default = default or 0, gate = gate }
 if type(extra) == "table" then
 for k, v in pairs(extra) do
@@ -34977,23 +35100,23 @@ end
 end
 return item
 end
-local function multi(id, label, options, defaults, gate, extra)
+function M.multi(id, label, options, defaults, gate, extra)
 local item = { type = "multi", id = id, label = label, options = options, defaults = defaults, gate = gate }
 if type(extra) == "table" then
 for k, v in pairs(extra) do item[k] = v end
 end
 return item
 end
-local function btn(id, label, gate)
+function M.btn(id, label, gate)
 return { type = "button", id = id, label = label, gate = gate }
 end
-local function sep(gate)
+function M.sep(gate)
 return { type = "separator", gate = gate }
 end
-local function label(text, dim, gate)
+function M.label(text, dim, gate)
 return { type = "label", label = text, dim = dim, gate = gate }
 end
-local function color(id, label_text, default, gate, override_idx)
+function M.color(id, label_text, default, gate, override_idx)
 return {
 type = "color",
 id = id,
@@ -35003,65 +35126,65 @@ gate = gate,
 color_override_idx = override_idx,
 }
 end
-local function input(id, label_text, default, gate)
+function M.input(id, label_text, default, gate)
 return { type = "input", id = id, label = label_text, default = default or "", gate = gate }
 end
-local function ak(key_id, label, gate)
+function M.ak(key_id, label, gate)
 return { type = "aim_key", id = key_id, mode_id = key_id .. "_mode", label = label, gate = gate }
 end
-local function hk(id, label, gate, default_vk)
+function M.hk(id, label, gate, default_vk)
 return { type = "hotkey", id = id, label = label, gate = gate, default = default_vk or 0x2D }
 end
-local function from_toggles(list, gate)
+function M.from_toggles(list, gate)
 local out = {}
 for _, t in ipairs(list) do
-out[#out + 1] = cb(t.id, t.label, false, t.color, gate)
+out[#out + 1] = M.cb(t.id, t.label, false, t.color, gate)
 if t.ring_id then
-out[#out + 1] = cb(t.ring_id, t.label .. " Range Ring", false, nil, gate)
+out[#out + 1] = M.cb(t.ring_id, t.label .. " Range Ring", false, nil, gate)
 end
 end
 return out
 end
-local function append(dst, src)
+function M.append(dst, src)
 for _, v in ipairs(src) do
 dst[#dst + 1] = v
 end
 end
-local function toggle_labels(list)
+function M.toggle_labels(list)
 local labels = {}
 for i, t in ipairs(list) do
 labels[i] = t.label
 end
 return labels
 end
-local function mesh_chams_block(prefix, toggle_list, master)
+function M.mesh_chams_block(prefix, toggle_list, master)
 local chams_id = prefix .. "_chams"
 local chams_master = prefix .. "_chams_enabled"
 local mode_id = prefix .. "_chams_mode"
 local color_id = prefix .. "_chams_color"
 return {
-sep(master),
-label("Mesh Chams (GPU)", false, master),
-cb(chams_master, "Enable Mesh Chams", false, nil, master),
-multi(chams_id, "Cham Types", toggle_labels(toggle_list), {}, chams_master),
-combo(mode_id, "Chams Mode", gpu_chams.MODE_LABELS, 0, chams_master),
-combo(color_id, "Glow Preset", gpu_chams.COLOR_LABELS, 0, chams_master, {
+M.sep(master),
+M.label("Mesh Chams (GPU)", false, master),
+M.cb(chams_master, "Enable Mesh Chams", false, nil, master),
+M.multi(chams_id, "Cham Types", M.toggle_labels(toggle_list), {}, chams_master),
+M.combo(mode_id, "Chams Mode", gpu_chams.MODE_LABELS, 0, chams_master),
+M.combo(color_id, "Glow Preset", gpu_chams.COLOR_LABELS, 0, chams_master, {
 gate_any_combo = {
 { mode_id, { 2, 3 } },
 },
 }),
 }
 end
-M.TABS = {
-{ id = "aim", icon = "aim", title = "Aimbot", label = "Aim" },
-{ id = "visuals", icon = "visuals", title = "Visuals", label = "Visuals" },
-{ id = "world", icon = "world", title = "World", label = "World" },
-{ id = "guns", icon = "guns", title = "Gun Mods", label = "Guns" },
-{ id = "misc", icon = "misc", title = "Misc", label = "Misc" },
-{ id = "radar", icon = "radar", title = "Radar", label = "Radar" },
-{ id = "config", icon = "config", title = "Config", label = "Config" },
-}
-local function build_aim()
+return M
+end)()
+
+April._mods["ui.catalog_aim"] = (function()
+local I = April.require("ui.catalog_items")
+local combat_menu = April.require("ui.combat_labels")
+local cb, kb, sl, combo, multi, btn, sep, color, input, ak =
+I.cb, I.kb, I.sl, I.combo, I.multi, I.btn, I.sep, I.color, I.input, I.ak
+local M = {}
+function M.build()
 local regular = {
 title = "Aimbot",
 master = "april_aimbot",
@@ -35155,7 +35278,15 @@ cb("april_silent_manip_peek_vis", "Peek Visual", false, nil, "april_bullet_enabl
 }
 return { regular, fov_flags, silent, bullet }
 end
-local function build_visuals()
+return M
+end)()
+
+April._mods["ui.catalog_visuals"] = (function()
+local I = April.require("ui.catalog_items")
+local cb, kb, sl, combo, multi, sep, color =
+I.cb, I.kb, I.sl, I.combo, I.multi, I.sep, I.color
+local M = {}
+function M.build()
 local left = {
 title = "Player ESP",
 master = "april_player_enabled",
@@ -35246,8 +35377,8 @@ title = "Audio Radar",
 master = "april_sound_esp",
 items = {
 cb("april_sound_esp", "Sound ESP", false),
-label("original by @n0v313w", true, "april_sound_esp"),
-label("Uses Player ESP filters + range.", true, "april_sound_esp"),
+I.label("original by @n0v313w", true, "april_sound_esp"),
+I.label("Uses Player ESP filters + range.", true, "april_sound_esp"),
 sep("april_sound_esp"),
 multi("april_sound_esp_filters", "Radar Filters", {
 "Footsteps", "Combat", "Utility", "World", "Other",
@@ -35268,7 +35399,16 @@ color("april_sound_esp_color", "Sound Color", { 0.78, 0.9, 1.0, 0.92 }, "april_s
 }
 return { left, gear, target_vis, colors, sound_esp }
 end
-local function build_world()
+return M
+end)()
+
+April._mods["ui.catalog_world"] = (function()
+local I = April.require("ui.catalog_items")
+local maps = April.require("game.esp_maps")
+local cb, kb, sl, combo, multi =
+I.cb, I.kb, I.sl, I.combo, I.multi
+local M = {}
+function M.build()
 local resources = {
 title = "Resources",
 master = "april_world_enabled",
@@ -35276,14 +35416,14 @@ items = {
 kb("april_world_enabled", "Resource ESP", false),
 },
 }
-append(resources.items, from_toggles(maps.WORLD_TOGGLES))
-append(resources.items, {
+I.append(resources.items, I.from_toggles(maps.WORLD_TOGGLES))
+I.append(resources.items, {
 cb("april_world_boxes", "Resource 3D Boxes", false),
 cb("april_world_show_name", "Resource Show Name", true),
 cb("april_world_show_distance", "Resource Show Distance", true),
 sl("april_world_range", "Resource Range", 50, 2000, 500),
 })
-append(resources.items, mesh_chams_block("april_world", maps.WORLD_TOGGLES, "april_world_enabled"))
+I.append(resources.items, I.mesh_chams_block("april_world", maps.WORLD_TOGGLES, "april_world_enabled"))
 local loot = {
 title = "Loot",
 master = "april_loot_enabled",
@@ -35291,14 +35431,14 @@ items = {
 kb("april_loot_enabled", "Loot ESP", false),
 },
 }
-append(loot.items, from_toggles(maps.LOOT_TOGGLES))
-append(loot.items, {
+I.append(loot.items, I.from_toggles(maps.LOOT_TOGGLES))
+I.append(loot.items, {
 cb("april_loot_boxes", "Loot 3D Boxes", false),
 cb("april_loot_show_name", "Loot Show Name", true),
 cb("april_loot_show_distance", "Loot Show Distance", true),
 sl("april_loot_range", "Loot Range", 50, 2000, 300),
 })
-append(loot.items, mesh_chams_block("april_loot", maps.LOOT_TOGGLES, "april_loot_enabled"))
+I.append(loot.items, I.mesh_chams_block("april_loot", maps.LOOT_TOGGLES, "april_loot_enabled"))
 local bases = {
 title = "Bases",
 master = "april_base_enabled",
@@ -35306,14 +35446,14 @@ items = {
 kb("april_base_enabled", "Base ESP", false),
 },
 }
-append(bases.items, from_toggles(maps.BASE_TOGGLES))
-append(bases.items, {
+I.append(bases.items, I.from_toggles(maps.BASE_TOGGLES))
+I.append(bases.items, {
 cb("april_base_boxes", "Base 3D Boxes", false),
 cb("april_base_show_name", "Base Show Name", true),
 cb("april_base_show_distance", "Base Show Distance", false),
 sl("april_base_range", "Base Range", 50, 500, 150),
 })
-append(bases.items, mesh_chams_block("april_base", maps.BASE_TOGGLES, "april_base_enabled"))
+I.append(bases.items, I.mesh_chams_block("april_base", maps.BASE_TOGGLES, "april_base_enabled"))
 local base_xray = {
 title = "Base Xray",
 master = "april_base_xray_enabled",
@@ -35350,16 +35490,16 @@ local npc_colors = {
 title = "NPC Colors",
 master = "april_npc_enabled",
 items = {
-color("april_npc_soldier", "Soldier", { 1, 0.3, 0.3, 1 }),
-color("april_npc_bruno", "Bruno", { 1, 0.65, 0.2, 1 }),
-color("april_npc_boris", "Boris", { 0.78, 0.42, 1, 1 }),
-color("april_npc_brutus", "Brutus", { 1, 0.3, 0.48, 1 }),
-color("april_npc_attack_heli", "Attack Heli", { 0.85, 0.2, 0.25, 1 }),
-color("april_npc_btr", "BTR", { 0.95, 0.25, 0.15, 1 }),
-color("april_npc_diver_dave", "Diver Dave", { 0.2, 0.75, 1, 1 }),
-color("april_npc_pilot_pete", "Pilot Pete", { 0.35, 1, 0.65, 1 }),
-color("april_npc_show_name", "Name", { 1, 0.3, 0.3, 1 }),
-color("april_npc_show_distance", "Distance", { 0.82, 0.84, 0.88, 0.92 }),
+I.color("april_npc_soldier", "Soldier", { 1, 0.3, 0.3, 1 }),
+I.color("april_npc_bruno", "Bruno", { 1, 0.65, 0.2, 1 }),
+I.color("april_npc_boris", "Boris", { 0.78, 0.42, 1, 1 }),
+I.color("april_npc_brutus", "Brutus", { 1, 0.3, 0.48, 1 }),
+I.color("april_npc_attack_heli", "Attack Heli", { 0.85, 0.2, 0.25, 1 }),
+I.color("april_npc_btr", "BTR", { 0.95, 0.25, 0.15, 1 }),
+I.color("april_npc_diver_dave", "Diver Dave", { 0.2, 0.75, 1, 1 }),
+I.color("april_npc_pilot_pete", "Pilot Pete", { 0.35, 1, 0.65, 1 }),
+I.color("april_npc_show_name", "Name", { 1, 0.3, 0.3, 1 }),
+I.color("april_npc_show_distance", "Distance", { 0.82, 0.84, 0.88, 0.92 }),
 },
 }
 local raids = {
@@ -35373,7 +35513,15 @@ sl("april_raid_range", "Raid ESP Range", 50, 5000, 1000),
 }
 return { resources, loot, npcs, npc_colors, raids, bases, base_xray }
 end
-local function build_guns()
+return M
+end)()
+
+April._mods["ui.catalog_guns"] = (function()
+local I = April.require("ui.catalog_items")
+local cb, kb, sl, combo, sep, color =
+I.cb, I.kb, I.sl, I.combo, I.sep, I.color
+local M = {}
+function M.build()
 return {
 {
 title = "Gun Mods",
@@ -35430,7 +35578,15 @@ cb("april_tracers_rainbow", "Tracer Rainbow", false, nil, "april_tracers_enabled
 },
 }
 end
-local function build_misc()
+return M
+end)()
+
+April._mods["ui.catalog_misc"] = (function()
+local I = April.require("ui.catalog_items")
+local cb, kb, sl, combo, multi, sep =
+I.cb, I.kb, I.sl, I.combo, I.multi, I.sep
+local M = {}
+function M.build()
 return {
 {
 title = "Movement",
@@ -35494,6 +35650,7 @@ kb("april_farm_helper", "Manual Farm Helper", false),
 sl("april_farm_radius", "Farm Range (studs)", 1, 10, 7, false, "april_farm_helper"),
 sep(),
 cb("april_anti_afk", "Anti AFK", false),
+kb("april_card_doors_enabled", "Open card doors", false),
 kb("april_antifling_enabled", "Anti Fling", false),
 sep(),
 kb("april_event_status_enabled", "Event Status", false),
@@ -35504,12 +35661,20 @@ cb("april_event_status_health", "Show Event Health", true, nil, "april_event_sta
 combo("april_event_status_sort", "Event Sorting", {
 "Game Order", "Active First", "Nearest First",
 }, 1, "april_event_status_enabled"),
-label("HUD panels are managed from the top dock."),
+I.label("HUD panels are managed from the top dock."),
 },
 },
 }
 end
-local function build_radar()
+return M
+end)()
+
+April._mods["ui.catalog_radar"] = (function()
+local I = April.require("ui.catalog_items")
+local cb, kb, sl, multi, btn, color =
+I.cb, I.kb, I.sl, I.multi, I.btn, I.color
+local M = {}
+function M.build()
 return {
 {
 title = "Tactical Map",
@@ -35556,7 +35721,15 @@ btn("april_wp_clear_all", "Clear All Waypoints"),
 },
 }
 end
-local function build_config()
+return M
+end)()
+
+April._mods["ui.catalog_config"] = (function()
+local I = April.require("ui.catalog_items")
+local cb, sl, combo, multi, btn, sep, color, input, hk =
+I.cb, I.sl, I.combo, I.multi, I.btn, I.sep, I.color, I.input, I.hk
+local M = {}
+function M.build()
 local modes = { "Static", "Rainbow", "Pulse", "Wave", "Flow" }
 local elem_modes = { "Default", "Static", "Rainbow", "Pulse", "Wave", "Flow" }
 local COL = "april_ui_custom_colors"
@@ -35567,7 +35740,7 @@ local SNOW = "april_ui_snow"
 local appearance = {
 title = "Appearance",
 items = {
-label("Look", true),
+I.label("Look", true),
 hk("april_ui_menu_key", "Menu Toggle Key"),
 combo("april_ui_theme_preset", "Theme Preset", {
 "Violet Glass", "Midnight Blue", "Graphite", "Emerald Glass",
@@ -35583,11 +35756,11 @@ sl("april_ui_scale", "UI Scale %", 80, 125, 100),
 combo("april_ui_density", "Density", { "Compact", "Balanced", "Comfortable" }, 1),
 cb("april_ui_show_cursor_dot", "Cursor Dot", true),
 sep(),
-label("Backdrop", true),
+I.label("Backdrop", true),
 cb("april_ui_menu_overlay", "Menu Overlay", true),
 sl("april_ui_overlay_strength", "Overlay Strength", 5, 100, 70, false, OVL),
 sep(),
-label("Snow", true),
+I.label("Snow", true),
 cb("april_ui_snow", "Enable Snow", false),
 sl("april_ui_snow_amount", "Amount", 10, 140, 50, false, SNOW),
 sl("april_ui_snow_speed", "Speed", 1, 100, 40, false, SNOW),
@@ -35598,14 +35771,14 @@ sl("april_ui_snow_opacity", "Opacity", 10, 100, 55, false, SNOW),
 local motion = {
 title = "Motion",
 items = {
-label("Basics", true),
+I.label("Basics", true),
 cb("april_ui_startup_intro", "Startup Animation", true),
 combo("april_ui_motion_profile", "Motion Profile", {
 "Subtle", "Balanced", "Expressive",
 }, 1),
 cb("april_ui_reduce_motion", "Reduce Motion", false),
 sep(),
-label("Advanced", true),
+I.label("Advanced", true),
 cb("april_ui_custom_anim", "Advanced Animation", false),
 combo("april_ui_accent_anim", "Accent Style", modes, 1, ANM),
 sl("april_ui_anim_speed", "Accent Speed", 1, 100, 40, false, ANM),
@@ -35627,11 +35800,11 @@ sep(ANM),
 local accent = {
 title = "Accent Colors",
 items = {
-label("Accent", true),
+I.label("Accent", true),
 cb("april_ui_custom_colors", "Custom Colors", false),
 color("april_ui_accent", "Main Accent", { 0.78, 0.20, 0.92, 1 }, COL),
 sep(COL),
-label("Overrides", true, COL),
+I.label("Overrides", true, COL),
 multi("april_ui_color_overrides", "Override For", {
 "Title Bar", "Section Tops", "Sliders", "Scrollbars", "Navbar", "Switches", "Overlay Panels",
 }, {}, COL),
@@ -35649,7 +35822,7 @@ title = "Anime Baddie",
 master = "april_anime_baddie_enabled",
 items = {
 cb("april_anime_baddie_enabled", "Anime Baddie", false),
-label("Also toggled from the top dock.", true),
+I.label("Also toggled from the top dock.", true),
 combo("april_anime_baddie_character", "Character", { "April", "VectorChan" }, 0,
 "april_anime_baddie_enabled"),
 combo("april_anime_baddie_personality", "Personality", {
@@ -35689,7 +35862,7 @@ title = "Config",
 items = {
 cb("april_ui_russian", "Russkiy yazyk", false),
 sep(),
-label("Configs", true),
+I.label("Configs", true),
 input("april_cfg_profile_name", "Config Name", "Default"),
 combo("april_cfg_selected", "Saved Configs", cfg_labels, 0),
 btn("april_cfg_save", "Save Config"),
@@ -35697,17 +35870,40 @@ btn("april_cfg_load", "Load Config"),
 btn("april_cfg_delete", "Delete Config"),
 btn("april_cfg_refresh", "Refresh List"),
 sep(),
-label("Autoload", true),
+I.label("Autoload", true),
 cb("april_cfg_autoload", "Autoload on Start", false),
 input("april_cfg_autoload_config", "Autoload Config Name", "", "april_cfg_autoload"),
 sep(),
-label("Extras", true),
+I.label("Extras", true),
 sl("april_esp_text_size", "ESP Text Size", 8, 24, 13),
 btn("april_reload_modules", "Reload Game Modules"),
 },
 }
 return { appearance, motion, accent, anime_baddie, config_group }
 end
+return M
+end)()
+
+April._mods["ui.catalog"] = (function()
+local M = {}
+M.TABS = {
+{ id = "aim", icon = "aim", title = "Aimbot", label = "Aim" },
+{ id = "visuals", icon = "visuals", title = "Visuals", label = "Visuals" },
+{ id = "world", icon = "world", title = "World", label = "World" },
+{ id = "guns", icon = "guns", title = "Gun Mods", label = "Guns" },
+{ id = "misc", icon = "misc", title = "Misc", label = "Misc" },
+{ id = "radar", icon = "radar", title = "Radar", label = "Radar" },
+{ id = "config", icon = "config", title = "Config", label = "Config" },
+}
+local BUILDERS = {
+aim = "ui.catalog_aim",
+visuals = "ui.catalog_visuals",
+world = "ui.catalog_world",
+guns = "ui.catalog_guns",
+misc = "ui.catalog_misc",
+radar = "ui.catalog_radar",
+config = "ui.catalog_config",
+}
 local group_cache = {}
 local EMPTY_GROUPS = {}
 function M.invalidate(tab_id)
@@ -35720,15 +35916,9 @@ end
 function M.groups_for(tab_id)
 local cached = group_cache[tab_id]
 if cached then return cached end
-local groups
-if tab_id == "aim" then groups = build_aim()
-elseif tab_id == "visuals" then groups = build_visuals()
-elseif tab_id == "world" then groups = build_world()
-elseif tab_id == "guns" then groups = build_guns()
-elseif tab_id == "misc" then groups = build_misc()
-elseif tab_id == "radar" then groups = build_radar()
-elseif tab_id == "config" then groups = build_config()
-else return EMPTY_GROUPS end
+local path = BUILDERS[tab_id]
+if not path then return EMPTY_GROUPS end
+local groups = April.require(path).build()
 group_cache[tab_id] = groups
 return groups
 end
@@ -37028,6 +37218,7 @@ M.FEATURE_ORDER = {
     "features.utility.mod_checker",
     "features.utility.event_status",
     "features.utility.anti_afk",
+    "features.utility.card_doors",
     "features.utility.keybind_viewer",
     "features.utility.anime_announcer",
     "features.utility.config",
@@ -37168,6 +37359,8 @@ local feature_bind = April.require("core.feature_bind")
 local aim_key = April.require("core.aim_key")
 local overlay_theme = April.require("core.overlay_theme")
 local settings = April.require("core.settings")
+local image_cache = April.require("core.image_cache")
+local manip_math = April.require("core.manip_math")
 local M = {}
 local initialized = false
 local alias_refresh_elapsed = 0
@@ -37187,6 +37380,8 @@ function M.on_frame()
     if not initialized then return end
     debug.tick_frame()
     settings.begin_frame(debug.frame_count())
+    image_cache.prune()
+    manip_math.prune_caches()
     pcall(feature_bind.tick)
     pcall(aim_key.tick, "april_aim_key", "april_aim_key_mode")
     if startup_intro.is_active() then

@@ -24,9 +24,9 @@ const ORDER = [
   { path: "ui/gs_icons.lua", mod: "ui.gs_icons" },
   { path: "ui/gs_widgets.lua", mod: "ui.gs_widgets" },
   // Template catalog is exposed as ui.catalog so custom_menu needs no changes.
-  { path: "ui/template_catalog.lua", mod: "ui.catalog" },
+  { path: "ui/template/catalog.lua", mod: "ui.catalog" },
   { path: "ui/custom_menu.lua", mod: "ui.custom_menu" },
-  { path: "ui/template_app.lua", mod: "ui.template_app" },
+  { path: "ui/template/app.lua", mod: "ui.template_app" },
 ];
 
 function SETTINGS_STUB() {
@@ -123,7 +123,7 @@ const header = `--[[
     Mouse wheel / PageUp/PageDown / edge-hover  scroll columns
 
   HOW TO ADD YOUR FEATURES
-    1. Edit the catalog module (search for "template_catalog" / "Example Aimbot").
+    1. Edit the catalog module (search for "Example Aimbot").
        - Add a tab in M.TABS
        - Build groups with cb / sl / combo / multi / kb / color / btn / ...
        - Use gate = "parent_checkbox_id" for nested options
@@ -147,8 +147,8 @@ const header = `--[[
        Or keep editing this single file if you prefer.
 
   SOURCE LAYOUT (when building from repo)
-    src/ui/template_catalog.lua   tabs + demo options
-    src/ui/template_app.lua       init / on_frame hooks
+    src/ui/template/catalog.lua   tabs + demo options
+    src/ui/template/app.lua       init / on_frame hooks
     src/ui/custom_menu.lua        window / tabs / layout
     src/ui/gs_*.lua               theme, input, widgets, state, icons, anim
 

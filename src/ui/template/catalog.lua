@@ -7,7 +7,7 @@
      Icon names: aim, visuals, world, guns, misc, radar, config
   2. Implement build_<tab>() that returns an array of "groups".
   3. Wire the tab in M.groups_for().
-  4. Read live values from ui.gs_state (see standalone_app examples).
+  4. Read live values from ui.gs_state (see ui/template/app.lua examples).
 
   ITEM HELPERS
   ------------
