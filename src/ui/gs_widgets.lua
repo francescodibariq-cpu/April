@@ -3,7 +3,6 @@ local theme = April.require("ui.gs_theme")
 local input = April.require("ui.gs_input")
 local state = April.require("ui.gs_state")
 local anim = April.require("ui.gs_anim")
-local ui_theme = April.require("core.ui_theme")
 local tooltips = April.require("ui.tooltips")
 
 local M = {}
@@ -460,15 +459,15 @@ function M.draw_tooltip_overlay()
     end
     ty = math.max(8, ty)
 
-    local bg = theme.alpha(ui_theme.PANEL, 0.96 * fade)
-    local border = theme.alpha(ui_theme.BORDER, 0.55 * fade)
-    local accent = theme.alpha(ui_theme.CYAN, fade)
+    local bg = theme.alpha(theme.PANEL_RAISED, 0.96 * fade)
+    local border = theme.alpha(theme.BORDER, 0.55 * fade)
+    local accent = theme.alpha(theme.ACCENT, fade)
     M.rect(tx, ty, box_w, box_h, bg, true, theme.CORNER_SMALL)
     M.rect(tx, ty, box_w, box_h, border, false, theme.CORNER_SMALL)
     M.rect(tx + 1, ty + 1, box_w - 2, 2, accent, true)
 
     for i = 1, #lines do
-        local col = theme.alpha(i == 1 and ui_theme.TEXT or ui_theme.TEXT_MUTED, fade)
+        local col = theme.alpha(i == 1 and theme.TEXT or theme.TEXT_DIM, fade)
         M.text(tx + pad, ty + pad + (i - 1) * 13, lines[i], col, fs)
     end
 end
@@ -987,6 +986,18 @@ local function focus_input(id)
     M.open_bind_mode = nil
     end_key_listen()
     M._input_repeat_vk = nil
+end
+
+function M.focus_text_input(id)
+    focus_input(id)
+end
+
+function M.blur_text_input(id)
+    if id == nil or M.active_input == id then
+        M.active_input = nil
+        M._active_input_rect = nil
+        M._input_repeat_vk = nil
+    end
 end
 
 local SLIDER_INPUT_VKS = {
@@ -1753,28 +1764,24 @@ function M.draw_color_picker(px, py, pw, ph, id, col)
     M.rect(hx - 1, hy + hue * hh - 1, hw + 2, 3, { 1, 1, 1, 1 }, false)
 end
 
-function M.input_row(x, y, w, id, label, default)
-    if id and not state.is_visible(id) then return 0 end
+function M.text_field(x, y, w, h, id, placeholder, default)
     state.define(id, default or "")
     local val = tostring(state.get(id, default or ""))
-    local label_y, ctrl_y, ctrl_h, h = stacked_metrics(y)
     if not in_clip(y, h) then return h end
-    M.text(x + 4, label_y, fit_text(label, w - 8, theme.FONT), theme.TEXT, theme.FONT)
-    local bx, by, bw, bh = x + 4, ctrl_y, w - 8, ctrl_h
     local focused = M.active_input == id
-    local hot = input.hover(bx, by, bw, bh)
+    local hot = input.hover(x, y, w, h)
     if focused then
-        M._active_input_rect = { x = bx, y = by, w = bw, h = bh }
+        M._active_input_rect = { x = x, y = y, w = w, h = h }
     end
-    M.rect(bx, by, bw, bh, anim.interactive_fill("input:" .. tostring(id), theme.BUTTON, hot, focused), true, theme.CORNER_SMALL)
-    M.rect(bx, by, bw, bh, focused and theme.FOCUS or (hot and theme.BORDER_HOT or theme.BORDER_SOFT), false, theme.CORNER_SMALL)
+    M.rect(x, y, w, h, anim.interactive_fill("input:" .. tostring(id), theme.BUTTON, hot, focused), true, theme.CORNER_SMALL)
+    M.rect(x, y, w, h, focused and theme.FOCUS or (hot and theme.BORDER_HOT or theme.BORDER_SOFT), false, theme.CORNER_SMALL)
 
     local shown = val
-    local text_x = bx + 6
-    local max_w = bw - 12
-    local text_y = by + math.floor((bh - 12) * 0.5)
+    local text_x = x + 7
+    local max_w = w - 14
+    local text_y = y + math.floor((h - theme.FONT_SMALL) * 0.5) - 1
     if shown == "" then
-        M.text(text_x, text_y, "...", theme.TEXT_DIM, theme.FONT_SMALL)
+        M.text(text_x, text_y, placeholder or "...", theme.TEXT_DIM, theme.FONT_SMALL)
     else
         while #shown > 0 and text_w(shown, theme.FONT_SMALL) > max_w do
             shown = shown:sub(2)
@@ -1786,14 +1793,23 @@ function M.input_row(x, y, w, id, label, default)
         local caret_x = text_x + text_w(shown ~= "" and shown or "", theme.FONT_SMALL)
         local now = tick_ms()
         if math.floor(now / 500) % 2 == 0 then
-            M.rect(caret_x, by + math.floor((bh - 10) * 0.5), 1, 10, theme.TEXT_ACTIVE, true)
+            M.rect(caret_x, y + math.floor((h - 10) * 0.5), 1, 10, theme.TEXT_ACTIVE, true)
         end
     end
 
-    if interactive(bx, by, bw, bh) and ui_clicked(bx, by, bw, bh) then
+    if interactive(x, y, w, h) and ui_clicked(x, y, w, h) then
         mark_interacted()
         focus_input(id)
     end
+    return h
+end
+
+function M.input_row(x, y, w, id, label, default)
+    if id and not state.is_visible(id) then return 0 end
+    local label_y, ctrl_y, ctrl_h, h = stacked_metrics(y)
+    if not in_clip(y, h) then return h end
+    M.text(x + 4, label_y, fit_text(label, w - 8, theme.FONT), theme.TEXT, theme.FONT)
+    M.text_field(x + 4, ctrl_y, w - 8, ctrl_h, id, "...", default)
     return h
 end
 

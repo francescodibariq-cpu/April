@@ -146,6 +146,7 @@ const ORDER = [
   "ui/catalog_radar.lua",
   "ui/catalog_config.lua",
   "ui/catalog.lua",
+  "ui/search_palette.lua",
   "ui/hud_dock.lua",
   "ui/menu_fx.lua",
   "ui/startup_intro.lua",
@@ -172,7 +173,7 @@ if (orphanSrc.length) {
   console.warn("src/ Lua files not in bundle ORDER:\n  " + orphanSrc.join("\n  "));
 }
 
-const VERSION = "4.3.2";
+const VERSION = "4.3.5";
 
 const header = `--[[
     April Fallen - Fallen Survival for Project Vector

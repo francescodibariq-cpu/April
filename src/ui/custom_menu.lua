@@ -13,6 +13,7 @@ local catalog = April.require("ui.catalog")
 local state = April.require("ui.gs_state")
 local hud_dock = April.require("ui.hud_dock")
 local menu_fx = April.require("ui.menu_fx")
+local search_palette = April.require("ui.search_palette")
 
 local M = {}
 
@@ -32,9 +33,12 @@ local win_x, win_y = 80, 80
 local scroll = { left = 0, right = 0 }
 local scroll_visual = { left = 0, right = 0 }
 local middle_scroll = nil
+local scrollbar_drag = nil
 local collapsed_groups = {}
 local last_menu_rect = nil
 local group_layout_cache = {}
+local search_focus = nil
+local search_scroll_pending = false
 
 local SCROLL_EDGE = 36
 local SCROLL_SPEED = 5
@@ -42,6 +46,7 @@ local WHEEL_STEP = 48
 local PAGE_STEP = 90
 local MIDDLE_DRAG_SCALE = 1.35
 local VK_PRIOR, VK_NEXT = 0x21, 0x22
+local SEARCH_HIGHLIGHT_SECONDS = 1.8
 
 local function screen_size()
     if draw and draw.get_screen_size then
@@ -114,6 +119,9 @@ local function color_override_on(idx)
 end
 
 local function item_visible(item, group)
+    if search_focus and search_focus.group == group and search_focus.item == item then
+        return true
+    end
     if group and group.master then
         if item.id == group.master then
             return true
@@ -262,18 +270,75 @@ local function draw_scrollbar(x, y, h, content_h, scroll_key, view_h)
     local max_scroll = clamp_scroll(scroll_key, content_h, view_h)
     if max_scroll <= 0 then
         scroll[scroll_key] = 0
+        if scrollbar_drag and scrollbar_drag.key == scroll_key then
+            scrollbar_drag = nil
+        end
         return
     end
 
-    local thumb_h = math.max(28, math.min(68, h * (view_h / content_h)))
+    local rail_x = x
+    local rail_y = y + 2
+    local rail_w = math.max(7, math.floor(7 * (theme.SCALE or 1)))
+    local rail_h = h - 4
+    local thumb_h = math.max(36, math.min(88, rail_h * (view_h / content_h)))
     local visual = scroll_visual[scroll_key] or scroll[scroll_key]
     visual = math.max(0, math.min(max_scroll, visual))
     local t = visual / max_scroll
-    local thumb_y = y + t * (h - thumb_h)
+    local travel = math.max(1, rail_h - thumb_h)
+    local thumb_y = rail_y + t * travel
+    local thumb_x = rail_x + 1
+    local thumb_w = rail_w - 2
+    local rail_hot = gin.hover(rail_x - 2, rail_y, rail_w + 4, rail_h)
+    local thumb_hot = gin.hover(thumb_x - 2, thumb_y - 2, thumb_w + 4, thumb_h + 4)
 
-    -- Inset pill only: no full-height accent track above the section cards.
-    widgets.rect(x + 1, y, 2, h, theme.alpha(theme.SLIDER_BG, 0.28), true, 1)
-    anim.draw_scroll_thumb(x, thumb_y, 3, thumb_h)
+    if scrollbar_drag and scrollbar_drag.key == scroll_key then
+        if gin.lmb then
+            local raw_t = (gin.my - rail_y - scrollbar_drag.offset_y) / travel
+            raw_t = math.max(0, math.min(1, raw_t))
+            scroll[scroll_key] = raw_t * max_scroll
+            scroll_visual[scroll_key] = scroll[scroll_key]
+            t = raw_t
+            thumb_y = rail_y + t * travel
+            widgets.interacted = true
+        else
+            scrollbar_drag = nil
+        end
+    elseif gin.lmb_click and rail_hot and not widgets.block_under then
+        local offset_y = thumb_h * 0.5
+        if thumb_hot then offset_y = gin.my - thumb_y end
+        scrollbar_drag = { key = scroll_key, offset_y = offset_y }
+        local raw_t = (gin.my - rail_y - offset_y) / travel
+        raw_t = math.max(0, math.min(1, raw_t))
+        scroll[scroll_key] = raw_t * max_scroll
+        scroll_visual[scroll_key] = scroll[scroll_key]
+        thumb_y = rail_y + raw_t * travel
+        widgets.interacted = true
+    end
+
+    local active = scrollbar_drag and scrollbar_drag.key == scroll_key
+    local emphasis = anim.transition("scrollbar:" .. scroll_key, rail_hot or active, 18)
+
+    -- A recessed capsule visually anchors the thumb to the column while the
+    -- layered accent keeps it legible without becoming a detached neon line.
+    widgets.rect(rail_x, rail_y, rail_w, rail_h,
+        theme.alpha(theme.PANEL_RAISED, 0.54 + emphasis * 0.18), true, rail_w * 0.5)
+    widgets.rect(rail_x, rail_y, rail_w, rail_h,
+        theme.alpha(theme.BORDER_SOFT, 0.42 + emphasis * 0.28), false, rail_w * 0.5)
+    widgets.rect(rail_x + math.floor(rail_w * 0.5), rail_y + 5, 1, rail_h - 10,
+        theme.alpha(theme.SLIDER_BG, 0.34 + emphasis * 0.18), true, 1)
+
+    if emphasis > 0.01 then
+        widgets.rect(thumb_x - 1, thumb_y - 2, thumb_w + 2, thumb_h + 4,
+            theme.alpha(theme.ACCENT, emphasis * 0.16), true, thumb_w * 0.5 + 1)
+    end
+    widgets.rect(thumb_x, thumb_y, thumb_w, thumb_h,
+        theme.alpha(theme.ACCENT_DIM, 0.72 + emphasis * 0.18), true, thumb_w * 0.5)
+    if thumb_h > 6 then
+        anim.draw_scroll_thumb(thumb_x + 1, thumb_y + 2,
+            math.max(2, thumb_w - 2), thumb_h - 4)
+    end
+    widgets.rect(thumb_x + 1, thumb_y + 3, 1, math.max(2, thumb_h - 6),
+        theme.alpha(theme.TEXT_ACTIVE, 0.14 + emphasis * 0.16), true, 1)
 end
 
 local function handle_column_scroll(x, y, w, h, scroll_key, content_h)
@@ -342,13 +407,33 @@ local function handle_column_scroll(x, y, w, h, scroll_key, content_h)
 
 end
 
-local function draw_group_title(x, box_top, w, title, collapsed, hot)
+local function focus_strength(group, item)
+    if not search_focus or search_focus.group ~= group or search_focus.item ~= item then
+        return 0
+    end
+    local elapsed = anim.now() - search_focus.started_at
+    if elapsed >= SEARCH_HIGHLIGHT_SECONDS then return 0 end
+    local fade = 1 - elapsed / SEARCH_HIGHLIGHT_SECONDS
+    return math.min(1, fade * 1.8)
+end
+
+local function draw_group_title(x, box_top, w, title, collapsed, hot, active, focus)
     local hover = anim.transition("group-header:" .. tostring(title), hot, anim.motion_rate(16))
-    if hover > 0.01 then
+    if focus > 0.01 then
+        widgets.rect(x + 4, box_top + 3, w - 8, theme.GROUP_HEADER_H - 6,
+            theme.alpha(theme.ACCENT_DIM, 0.32 + focus * 0.34), true, theme.CORNER_SMALL)
+        widgets.rect(x + 5, box_top + 6, 2, theme.GROUP_HEADER_H - 12,
+            theme.alpha(theme.ACCENT, focus), true, 1)
+    elseif hover > 0.01 then
         widgets.rect(x + 5, box_top + 4, w - 10, theme.GROUP_HEADER_H - 8,
             theme.alpha(theme.HOVER, hover * 0.45), true, theme.CORNER_SMALL)
     end
-    widgets.text(x + 14, box_top + 8, title, theme.TEXT_ACTIVE, theme.FONT_TITLE)
+    if active then
+        widgets.rect(x + 5, box_top + 8, 2, theme.GROUP_HEADER_H - 16,
+            theme.ACCENT, true, 1)
+    end
+    widgets.text(x + 14, box_top + 8, title,
+        active and theme.TEXT_ACTIVE or theme.TEXT, theme.FONT_TITLE)
     local cx = x + w - 16
     local cy = box_top + theme.GROUP_HEADER_H * 0.5
     local line = draw and (draw.line or draw.Line)
@@ -365,12 +450,16 @@ local function draw_group_column(groups, x, y, w, h, scroll_key)
     for _, group in ipairs(groups) do
         if group_visible(group) then
             local collapse_key = scroll_key .. ":" .. tostring(group.title)
+            if search_focus and search_focus.group == group then
+                collapsed_groups[collapse_key] = false
+            end
             local collapsed = collapsed_groups[collapse_key] == true
             local expanded = anim.transition(
                 "group-expand:" .. collapse_key,
                 not collapsed,
                 anim.motion_rate(18)
             )
+            if search_focus and search_focus.group == group then expanded = 1 end
             if collapsed and expanded < 0.02 then expanded = 0 end
             if not collapsed and expanded > 0.98 then expanded = 1 end
             local full_h = content_height(group.items or {}, group)
@@ -400,6 +489,7 @@ local function draw_group_column(groups, x, y, w, h, scroll_key)
         anim.motion_rate(18)
     )
     local gy = y + pad - scroll_visual[scroll_key]
+    local focus_screen_y = nil
     widgets.clip = { x = x, y = y, w = w, h = h }
 
     for _, entry in ipairs(visible_groups) do
@@ -410,6 +500,21 @@ local function draw_group_column(groups, x, y, w, h, scroll_key)
 
         local box_top = gy
         local box_bot = gy + box_h
+        if search_focus and search_focus.group == group and search_focus.item == nil then
+            focus_screen_y = box_top + theme.GROUP_HEADER_H * 0.5
+        elseif search_focus and search_focus.group == group and search_focus.item then
+            local target_y = gy + theme.GROUP_HEADER_H + 6
+            for _, candidate in ipairs(items) do
+                if item_visible(candidate, group) then
+                    local target_h = widgets.estimate_height(candidate)
+                    if candidate == search_focus.item then
+                        focus_screen_y = target_y + target_h * 0.5
+                        break
+                    end
+                    target_y = target_y + target_h + theme.ITEM_GAP
+                end
+            end
+        end
         if box_bot > y and box_top < y + h then
             local vis_y = math.max(box_top, y)
             local vis_b = math.min(box_bot, y + h)
@@ -422,7 +527,9 @@ local function draw_group_column(groups, x, y, w, h, scroll_key)
                         theme.alpha(theme.PANEL_ALT, 0.42), true, theme.CORNER)
                     local header_hot = gin.hover(x, box_top, w, theme.GROUP_HEADER_H)
                     local i18n = April.require("ui.i18n")
-                    draw_group_title(x, box_top, w, i18n.t(group.title), entry.collapsed, header_hot)
+                    draw_group_title(x, box_top, w, i18n.t(group.title), entry.collapsed,
+                        header_hot, group.master and master_on(group.master),
+                        focus_strength(group, nil))
                     if gin.clicked(x, box_top, w, theme.GROUP_HEADER_H)
                         and not widgets.block_under
                         and not widgets.open_combo and not widgets.open_multi
@@ -441,6 +548,14 @@ local function draw_group_column(groups, x, y, w, h, scroll_key)
                 if item_visible(item, group) then
                     local est = widgets.estimate_height(item)
                     if iy >= y and iy + est <= y + h and iy + est <= reveal_bottom then
+                        local focus = focus_strength(group, item)
+                        if focus > 0.01 then
+                            widgets.rect(ix - 2, iy - 2, iw + 4, est + 4,
+                                theme.alpha(theme.ACCENT_DIM, 0.28 + focus * 0.34),
+                                true, theme.CORNER_SMALL)
+                            widgets.rect(ix - 2, iy + 3, 2, math.max(4, est - 6),
+                                theme.alpha(theme.ACCENT, focus), true, 1)
+                        end
                         local used = widgets.draw_item(item, ix, iy, iw)
                         if used < 1 then used = est end
                         iy = iy + used + theme.ITEM_GAP
@@ -455,8 +570,14 @@ local function draw_group_column(groups, x, y, w, h, scroll_key)
     end
 
     widgets.clip = nil
+    if search_scroll_pending and focus_screen_y then
+        scroll[scroll_key] = scroll[scroll_key] + focus_screen_y - (y + h * 0.42)
+        clamp_scroll(scroll_key, total, h)
+        scroll_visual[scroll_key] = scroll[scroll_key]
+        search_scroll_pending = false
+    end
     handle_column_scroll(x, y, w, h, scroll_key, total)
-    draw_scrollbar(x + w - 5, y + pad, h - pad * 2, total, scroll_key, h)
+    draw_scrollbar(x + w - 9, y + pad, h - pad * 2, total, scroll_key, h)
 end
 
 local function split_groups(groups, tab_id)
@@ -502,7 +623,7 @@ function M.init()
     state.define("april_ui_panel_opacity", 72)
     state.define("april_ui_border_strength", 58)
     state.define("april_ui_corner_style", 2)
-    state.define("april_ui_scale", 100)
+    state.define("april_ui_scale", 102)
     state.define("april_ui_density", 1)
     state.define("april_ui_motion_profile", 1)
     state.define("april_ui_reduce_motion", false)
@@ -540,6 +661,7 @@ function M.init()
     state.define_color("april_ui_col_sidebar", theme.ACCENT)
     state.define_color("april_ui_col_checkbox", theme.ACCENT)
     state.define_color("april_ui_col_overlay", theme.ACCENT)
+    search_palette.init()
     hud_dock.init()
     if state.get_key("april_ui_menu_key") == 0 then
         state.set_key("april_ui_menu_key", TOGGLE_VK_DEFAULT)
@@ -591,6 +713,30 @@ function M.draw()
     widgets.tick_key_listen()
     widgets.tick_slider_input()
     widgets.tick_text_input()
+
+    local search_result = search_palette.consume_selection()
+    if search_result then
+        tab_index = search_result.tab_index or tab_index
+        scroll.left, scroll.right = 0, 0
+        scroll_visual.left, scroll_visual.right = 0, 0
+        if search_result.group then
+            search_focus = {
+                group = search_result.group,
+                item = search_result.item,
+                started_at = anim.now(),
+            }
+            search_scroll_pending = true
+        else
+            search_focus = nil
+            search_scroll_pending = false
+        end
+        widgets.open_combo = nil
+        widgets.open_multi = nil
+    end
+    if search_focus and anim.now() - search_focus.started_at >= SEARCH_HIGHLIGHT_SECONDS then
+        search_focus = nil
+        search_scroll_pending = false
+    end
 
     local open_progress = anim.menu_open_progress(open)
     if not open and open_progress <= 0.015 then
@@ -656,7 +802,29 @@ function M.draw()
         0.88
     )
 
+    local search_w = math.max(28, math.floor(30 * (theme.SCALE or 1)))
+    local search_h = math.max(22, math.floor(24 * (theme.SCALE or 1)))
+    local search_x = x + math.floor((w - search_w) * 0.5)
+    local search_y = y + math.floor((title_h - search_h) * 0.5) + 2
+    local search_hot = gin.hover(search_x, search_y, search_w, search_h)
+    local search_emphasis = anim.transition("title-search", search_hot or search_palette.is_open(), 18)
+    if search_emphasis > 0.01 then
+        widgets.rect(search_x, search_y, search_w, search_h,
+            theme.alpha(search_palette.is_open() and theme.NAV_ACTIVE or theme.HOVER,
+                0.38 + search_emphasis * 0.34), true, theme.CORNER_SMALL)
+    end
+    icons.draw("search", search_x + search_w * 0.5, search_y + search_h * 0.5,
+        search_emphasis > 0.3 and theme.TEXT_ACTIVE or theme.TEXT_DIM)
+    if gin.clicked(search_x, search_y, search_w, search_h) then
+        search_palette.toggle()
+    end
+
+    if search_palette.is_open() then
+        widgets.block_under = true
+    end
+
     if gin.lmb_click and gin.hover(x, y, w, title_h + 5)
+        and not gin.hover(search_x, search_y, search_w, search_h)
         and not widgets.active_slider and not widgets.active_slider_input and not widgets.listening_key
         and not widgets.active_input
         and not widgets.block_under
@@ -703,6 +871,7 @@ function M.draw()
     widgets.draw_bind_mode_overlay()
     widgets.draw_color_ctx_overlay()
     widgets.draw_tooltip_overlay()
+    search_palette.draw(x + w * 0.5, y + title_h + 7, w)
     widgets.end_popups()
 
     if open then

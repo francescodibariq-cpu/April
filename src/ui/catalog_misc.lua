@@ -8,7 +8,7 @@ local M = {}
 function M.build()
     return {
         {
-            title = "Movement",
+            title = "Mobility",
             items = {
                 kb("april_fly_enabled", "Fly", false),
                 sl("april_fly_speed", "Fly Speed", 1, 20, 5, false, "april_fly_enabled"),
@@ -18,7 +18,11 @@ function M.build()
                 sl("april_spider_speed", "Spider Speed", 18, 30, 18, false, "april_spider_enabled"),
                 sep(),
                 kb("april_bhop_enabled", "Bunny Hop", false),
-                sep(),
+            },
+        },
+        {
+            title = "Combat Movement",
+            items = {
                 kb("april_desync_enabled", "Desync", false),
                 cb("april_desync_visualizer", "Desync Visualize", false, { 0.2, 0.85, 1, 0.9 }, "april_desync_enabled"),
                 sep(),
@@ -56,7 +60,7 @@ function M.build()
             },
         },
         {
-            title = "Utility",
+            title = "Automation",
             items = {
                 kb("april_autofarm", "Autofarm", false),
                 multi("april_autofarm_resources", "Farm Resources", {
@@ -67,11 +71,20 @@ function M.build()
                 sep(),
                 kb("april_farm_helper", "Manual Farm Helper", false),
                 sl("april_farm_radius", "Farm Range (studs)", 1, 10, 7, false, "april_farm_helper"),
-                sep(),
+            },
+        },
+        {
+            title = "Protection & Access",
+            items = {
                 cb("april_anti_afk", "Anti AFK", false),
                 kb("april_card_doors_enabled", "Open card doors", false),
                 kb("april_antifling_enabled", "Anti Fling", false),
-                sep(),
+            },
+        },
+        {
+            title = "Event Status",
+            master = "april_event_status_enabled",
+            items = {
                 kb("april_event_status_enabled", "Event Status", false),
                 cb("april_event_status_active_only", "Only Show Active Events", false, nil, "april_event_status_enabled"),
                 cb("april_event_status_notify", "Event Notifications", true, nil, "april_event_status_enabled"),

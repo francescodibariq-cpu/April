@@ -39,6 +39,7 @@ Combat helpers (`targeting`, `silent_resolve`, `bullet_tp_ray`, …) are librari
 | `catalog_items.lua` | Shared control constructors |
 | `custom_menu.lua` | Window, INSERT toggle, scrolling |
 | `gs_*.lua` | Theme, input, widgets, state, icons, anim |
+| `search_palette.lua` | Full-catalog search, autocomplete, navigation, and result targeting |
 | `hud_dock.lua` | Top-bar HUD panel toggles |
 | `menu_shim.lua` | `menu.*` → `gs_state` |
 | `template/` | Standalone UI kit (not in the game bundle) |

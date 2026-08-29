@@ -1,5 +1,5 @@
 April = {
-    version = "4.3.2",
+    version = "4.3.5",
     debug = false,
     crash_logging = false,
     crash_trace = false,
@@ -30628,7 +30628,7 @@ function M.sync()
     last_sync_frame = frame
     local preset_idx = math.floor(clamp(setting("april_ui_theme_preset", 0), 0, #PRESETS - 1)) + 1
     local p = PRESETS[preset_idx] or PRESETS[1]
-    local scale = clamp(setting("april_ui_scale", 100), 80, 125) * 0.01
+    local scale = clamp(setting("april_ui_scale", 102), 80, 125) * 0.01
     local density = math.floor(clamp(setting("april_ui_density", 1), 0, 2))
     local density_mul = ({ 0.88, 1.0, 1.12 })[density + 1]
     local window_alpha = clamp(setting("april_ui_window_opacity", 86), 45, 100) * 0.01
@@ -30699,18 +30699,18 @@ function M.sync()
     M.BUTTON_HOVER = mix_rgb(p.panel, p.raised, 0.68, math.min(1, panel_alpha + 0.14))
     M.HOVER = mix_rgb(p.panel, p.raised, 0.48, 0.68)
     M.FOCUS = rgb(p.accent, 0.72)
-    M.FONT = scaled(13, scale)
+    M.FONT = scaled(14, scale)
     M.FONT_SMALL = scaled(12, scale)
-    M.FONT_TITLE = scaled(12, scale)
+    M.FONT_TITLE = scaled(13, scale)
     M.FONT_CAPTION = scaled(11, scale)
-    M.FONT_BRAND = scaled(15, scale)
-    M.WINDOW_W = scaled(820, scale)
-    M.WINDOW_H = scaled(560, scale)
-    M.TITLEBAR_H = scaled(30 * density_mul, scale)
-    M.NAV_H = scaled(42 * density_mul, scale)
+    M.FONT_BRAND = scaled(16, scale)
+    M.WINDOW_W = scaled(900, scale)
+    M.WINDOW_H = scaled(620, scale)
+    M.TITLEBAR_H = scaled(34 * density_mul, scale)
+    M.NAV_H = scaled(46 * density_mul, scale)
     M.NAVBAR_H = M.NAV_H
-    M.NAV_ITEM_H = scaled(34 * density_mul, scale)
-    M.NAV_ITEM_MIN_W = scaled(78, scale)
+    M.NAV_ITEM_H = scaled(36 * density_mul, scale)
+    M.NAV_ITEM_MIN_W = scaled(84, scale)
     M.NAV_ITEM_GAP = scaled(4, scale)
     M.NAV_GAP = M.NAV_ITEM_GAP
     M.NAV_PAD_X = scaled(12, scale)
@@ -30733,9 +30733,9 @@ function M.sync()
     M.TAB_H = scaled(48 * density_mul, scale)
     M.GROUP_PAD = scaled(12, scale)
     M.GROUP_GAP = scaled(12 * density_mul, scale)
-    M.GROUP_HEADER_H = scaled(30 * density_mul, scale)
-    M.ROW_H = scaled(26 * density_mul, scale)
-    M.ITEM_GAP = scaled(8 * density_mul, scale)
+    M.GROUP_HEADER_H = scaled(32 * density_mul, scale)
+    M.ROW_H = scaled(28 * density_mul, scale)
+    M.ITEM_GAP = scaled(9 * density_mul, scale)
     M.LABEL_H = scaled(16 * density_mul, scale)
     M.LABEL_GAP = scaled(8 * density_mul, scale)
     M.CTRL_H = scaled(20 * density_mul, scale)
@@ -31743,6 +31743,15 @@ local STRINGS = {
     ["Paste Color"] = "Vstavit tsvet",
     ["None"] = "Net",
     ["Made by Cunzaki"] = "Sdelano Cunzaki",
+    ["Search features, modules, settings..."] = "Poisk funktsiy, moduley, nastroek...",
+    ["Type to search every feature and module"] = "Vvedite tekst dlya poiska funktsiy i moduley",
+    ["No matching features or modules"] = "Sovpadeniy ne naydeno",
+    ["Tab autocomplete   Up/Down navigate   Enter open   Esc close"] = "Tab dopolnit   Up/Down vybor   Enter otkryt   Esc zakryt",
+    ["Open section"] = "Otkryt razdel",
+    ["Tab"] = "Razdel",
+    ["Module"] = "Modul",
+    ["Feature"] = "Funktsiya",
+    ["Setting"] = "Nastroyka",
     ["Loading modules"] = "Zagruzka moduley",
     ["KEYBINDS"] = "BINDY",
     ["No binds"] = "Net bindov",
@@ -31813,6 +31822,16 @@ local STRINGS = {
     ["Category Colors"] = "Tsveta kategoriy",
     ["Footsteps"] = "Shagi",
     ["Combat"] = "Boy",
+    ["Weapons"] = "Oruzhie",
+    ["Movement & Utility"] = "Dvizhenie i utility",
+    ["Settings"] = "Nastroyki",
+    ["Targeting, aim behavior, and bullet control"] = "Navedenie, povedenie aima i kontrol pul",
+    ["Player information, crosshair, gear, and audio"] = "Informatsiya ob igrokah, pritsel, snaryazhenie i audio",
+    ["Resources, loot, NPCs, raids, and bases"] = "Resursy, lut, NPC, reydy i bazy",
+    ["Weapon tuning and bullet tracer effects"] = "Nastroyka oruzhiya i effekty trasserov",
+    ["Movement, automation, protection, and events"] = "Dvizhenie, avtomatizatsiya, zaschita i iventy",
+    ["Tactical map layers and world waypoints"] = "Sloi takticheskoy karty i veypointy",
+    ["Appearance, motion, profiles, and extras"] = "Vneshniy vid, animatsiya, profili i dopolneniya",
     ["World"] = "Mir",
     ["Other"] = "Drugoe",
     ["Sound Fade In"] = "Sound poyavlenie",
@@ -31834,12 +31853,20 @@ local STRINGS = {
     ["Raids"] = "Reydy",
     ["Movement"] = "Dvizhenie",
     ["Utility"] = "Utility",
+    ["Mobility"] = "Mobilnost",
+    ["Combat Movement"] = "Boevoe dvizhenie",
+    ["Automation"] = "Avtomatizatsiya",
+    ["Protection & Access"] = "Zaschita i dostup",
     ["Tactical Map"] = "Takticheskaya karta",
     ["Waypoints"] = "Veypointy",
     ["Appearance"] = "Vneshniy vid",
     ["Motion"] = "Animatsiya",
     ["Accent Colors"] = "Tsveta aktsenta",
     ["Anime Baddie"] = "Anime-devushka",
+    ["Targeting"] = "Navedenie",
+    ["Behavior"] = "Povedenie",
+    ["Accuracy"] = "Tochnost",
+    ["Feedback"] = "Obratnaya svyaz",
     ["Enable Aimbot"] = "Vklyuchit aimbot",
     ["Aim Key"] = "Klavisha aima",
     ["Target Type"] = "Tip tseli",
@@ -33331,6 +33358,9 @@ cx + math.cos(a) * 8.2, cy + math.sin(a) * 8.2,
 col, 1.8
 )
 end
+elseif name == "search" then
+circle(cx - 1.8, cy - 1.8, 5.2, col, false, 22)
+line(cx + 2.1, cy + 2.1, cx + 7.2, cy + 7.2, col, 1.8)
 elseif name == "keybinds" then
 rect(cx - 8, cy - 6, 16, 12, col, false, 2)
 for row = 0, 1 do
@@ -33401,7 +33431,6 @@ local theme = April.require("ui.gs_theme")
 local input = April.require("ui.gs_input")
 local state = April.require("ui.gs_state")
 local anim = April.require("ui.gs_anim")
-local ui_theme = April.require("core.ui_theme")
 local tooltips = April.require("ui.tooltips")
 local M = {}
 M.active_slider = nil
@@ -33809,14 +33838,14 @@ if ty + box_h > sh - 8 then
 ty = anchor.y - box_h - 6
 end
 ty = math.max(8, ty)
-local bg = theme.alpha(ui_theme.PANEL, 0.96 * fade)
-local border = theme.alpha(ui_theme.BORDER, 0.55 * fade)
-local accent = theme.alpha(ui_theme.CYAN, fade)
+local bg = theme.alpha(theme.PANEL_RAISED, 0.96 * fade)
+local border = theme.alpha(theme.BORDER, 0.55 * fade)
+local accent = theme.alpha(theme.ACCENT, fade)
 M.rect(tx, ty, box_w, box_h, bg, true, theme.CORNER_SMALL)
 M.rect(tx, ty, box_w, box_h, border, false, theme.CORNER_SMALL)
 M.rect(tx + 1, ty + 1, box_w - 2, 2, accent, true)
 for i = 1, #lines do
-local col = theme.alpha(i == 1 and ui_theme.TEXT or ui_theme.TEXT_MUTED, fade)
+local col = theme.alpha(i == 1 and theme.TEXT or theme.TEXT_DIM, fade)
 M.text(tx + pad, ty + pad + (i - 1) * 13, lines[i], col, fs)
 end
 end
@@ -34274,6 +34303,16 @@ M.open_color = nil
 M.open_bind_mode = nil
 end_key_listen()
 M._input_repeat_vk = nil
+end
+function M.focus_text_input(id)
+focus_input(id)
+end
+function M.blur_text_input(id)
+if id == nil or M.active_input == id then
+M.active_input = nil
+M._active_input_rect = nil
+M._input_repeat_vk = nil
+end
 end
 local SLIDER_INPUT_VKS = {
 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39,
@@ -34950,27 +34989,23 @@ local my = sy + (1 - val) * sq
 M.rect(mx - 2, my - 2, 4, 4, { 1, 1, 1, 1 }, false)
 M.rect(hx - 1, hy + hue * hh - 1, hw + 2, 3, { 1, 1, 1, 1 }, false)
 end
-function M.input_row(x, y, w, id, label, default)
-if id and not state.is_visible(id) then return 0 end
+function M.text_field(x, y, w, h, id, placeholder, default)
 state.define(id, default or "")
 local val = tostring(state.get(id, default or ""))
-local label_y, ctrl_y, ctrl_h, h = stacked_metrics(y)
 if not in_clip(y, h) then return h end
-M.text(x + 4, label_y, fit_text(label, w - 8, theme.FONT), theme.TEXT, theme.FONT)
-local bx, by, bw, bh = x + 4, ctrl_y, w - 8, ctrl_h
 local focused = M.active_input == id
-local hot = input.hover(bx, by, bw, bh)
+local hot = input.hover(x, y, w, h)
 if focused then
-M._active_input_rect = { x = bx, y = by, w = bw, h = bh }
+M._active_input_rect = { x = x, y = y, w = w, h = h }
 end
-M.rect(bx, by, bw, bh, anim.interactive_fill("input:" .. tostring(id), theme.BUTTON, hot, focused), true, theme.CORNER_SMALL)
-M.rect(bx, by, bw, bh, focused and theme.FOCUS or (hot and theme.BORDER_HOT or theme.BORDER_SOFT), false, theme.CORNER_SMALL)
+M.rect(x, y, w, h, anim.interactive_fill("input:" .. tostring(id), theme.BUTTON, hot, focused), true, theme.CORNER_SMALL)
+M.rect(x, y, w, h, focused and theme.FOCUS or (hot and theme.BORDER_HOT or theme.BORDER_SOFT), false, theme.CORNER_SMALL)
 local shown = val
-local text_x = bx + 6
-local max_w = bw - 12
-local text_y = by + math.floor((bh - 12) * 0.5)
+local text_x = x + 7
+local max_w = w - 14
+local text_y = y + math.floor((h - theme.FONT_SMALL) * 0.5) - 1
 if shown == "" then
-M.text(text_x, text_y, "...", theme.TEXT_DIM, theme.FONT_SMALL)
+M.text(text_x, text_y, placeholder or "...", theme.TEXT_DIM, theme.FONT_SMALL)
 else
 while #shown > 0 and text_w(shown, theme.FONT_SMALL) > max_w do
 shown = shown:sub(2)
@@ -34981,13 +35016,21 @@ if focused then
 local caret_x = text_x + text_w(shown ~= "" and shown or "", theme.FONT_SMALL)
 local now = tick_ms()
 if math.floor(now / 500) % 2 == 0 then
-M.rect(caret_x, by + math.floor((bh - 10) * 0.5), 1, 10, theme.TEXT_ACTIVE, true)
+M.rect(caret_x, y + math.floor((h - 10) * 0.5), 1, 10, theme.TEXT_ACTIVE, true)
 end
 end
-if interactive(bx, by, bw, bh) and ui_clicked(bx, by, bw, bh) then
+if interactive(x, y, w, h) and ui_clicked(x, y, w, h) then
 mark_interacted()
 focus_input(id)
 end
+return h
+end
+function M.input_row(x, y, w, id, label, default)
+if id and not state.is_visible(id) then return 0 end
+local label_y, ctrl_y, ctrl_h, h = stacked_metrics(y)
+if not in_clip(y, h) then return h end
+M.text(x + 4, label_y, fit_text(label, w - 8, theme.FONT), theme.TEXT, theme.FONT)
+M.text_field(x + 4, ctrl_y, w - 8, ctrl_h, id, "...", default)
 return h
 end
 function M.estimate_height(item)
@@ -35192,6 +35235,7 @@ items = {
 kb("april_aimbot", "Enable Aimbot", false, nil, { hide_color = true }),
 ak("april_aim_key", "Aim Key"),
 sep(),
+I.label("Targeting", true),
 combo("april_aim_target_type", "Target Type", { "Crosshair", "Distance" }, 0),
 combo("april_aim_bone", "Hitbox", combat_menu.SILENT_BONES, 0),
 multi("april_aim_targets", "Aim At", combat_menu.AIM_AT_OPTIONS, combat_menu.AIM_AT_DEFAULTS),
@@ -35203,6 +35247,7 @@ input("april_aim_whitelist_ids", "Whitelist IDs", ""),
 btn("april_aim_whitelist_clear", "Clear Whitelist"),
 sl("april_aim_max_dist", "Max Distance (m)", 50, 2000, 500),
 sep(),
+I.label("Behavior", true),
 cb("april_aim_sticky", "Sticky Aim", false),
 cb("april_aim_auto_pred", "Auto Prediction", true),
 sl("april_aim_smooth", "Smoothness", 1, 25, 10),
@@ -35213,6 +35258,7 @@ cb("april_aim_humanize", "Humanize", false),
 sl("april_aim_humanize_str", "Humanize Strength", 1, 100, 35, false, "april_aim_humanize"),
 sl("april_aim_fov", "FOV Radius (px)", 5, 600, 120),
 sep(),
+I.label("Feedback", true),
 cb("april_aim_draw_fov", "FOV Circle", false, { 0.2, 1, 0.45, 1 }),
 combo("april_aim_fov_style", "FOV Style", { "Outline", "Filled Circle" }, 1, "april_aim_draw_fov"),
 cb("april_aim_target_line", "Target Line", false, { 0.2, 1, 0.45, 1 }),
@@ -35233,6 +35279,7 @@ master = "april_silent_aim",
 items = {
 kb("april_silent_aim", "Enable Silent Aim", false, nil, { hide_color = true }),
 sep(),
+I.label("Targeting", true),
 combo("april_silent_target_type", "Target Type", { "Crosshair", "Distance" }, 0),
 combo("april_silent_bone", "Hitbox", combat_menu.SILENT_BONES, 0),
 multi("april_silent_targets", "Aim At", combat_menu.AIM_AT_OPTIONS, combat_menu.AIM_AT_DEFAULTS),
@@ -35244,10 +35291,12 @@ input("april_silent_whitelist_ids", "Whitelist IDs", ""),
 btn("april_silent_whitelist_clear", "Clear Whitelist"),
 sl("april_silent_max_dist", "Max Distance (m)", 50, 2000, 500),
 sep(),
+I.label("Accuracy", true),
 cb("april_silent_sticky", "Sticky Aim", false),
 sl("april_silent_hit_chance", "Hit Chance %", 1, 100, 100),
 sl("april_silent_fov", "FOV Radius (px)", 5, 600, 150),
 sep(),
+I.label("Feedback", true),
 cb("april_silent_draw_fov", "FOV Circle", false, { 0.55, 0.2, 1, 1 }),
 combo("april_silent_fov_style", "FOV Style", { "Outline", "Filled Circle" }, 1, "april_silent_draw_fov"),
 cb("april_silent_target_line", "Snapline", false, { 1, 0.25, 0.25, 1 }),
@@ -35589,7 +35638,7 @@ local M = {}
 function M.build()
 return {
 {
-title = "Movement",
+title = "Mobility",
 items = {
 kb("april_fly_enabled", "Fly", false),
 sl("april_fly_speed", "Fly Speed", 1, 20, 5, false, "april_fly_enabled"),
@@ -35599,7 +35648,11 @@ kb("april_spider_enabled", "Spider", false),
 sl("april_spider_speed", "Spider Speed", 18, 30, 18, false, "april_spider_enabled"),
 sep(),
 kb("april_bhop_enabled", "Bunny Hop", false),
-sep(),
+},
+},
+{
+title = "Combat Movement",
+items = {
 kb("april_desync_enabled", "Desync", false),
 cb("april_desync_visualizer", "Desync Visualize", false, { 0.2, 0.85, 1, 0.9 }, "april_desync_enabled"),
 sep(),
@@ -35637,7 +35690,7 @@ sl("april_fling_duration", "Fling Duration", 2, 10, 2, false, "april_fling_enabl
 },
 },
 {
-title = "Utility",
+title = "Automation",
 items = {
 kb("april_autofarm", "Autofarm", false),
 multi("april_autofarm_resources", "Farm Resources", {
@@ -35648,11 +35701,20 @@ cb("april_autofarm_debug_path", "Debug Target Path", false, nil, "april_autofarm
 sep(),
 kb("april_farm_helper", "Manual Farm Helper", false),
 sl("april_farm_radius", "Farm Range (studs)", 1, 10, 7, false, "april_farm_helper"),
-sep(),
+},
+},
+{
+title = "Protection & Access",
+items = {
 cb("april_anti_afk", "Anti AFK", false),
 kb("april_card_doors_enabled", "Open card doors", false),
 kb("april_antifling_enabled", "Anti Fling", false),
-sep(),
+},
+},
+{
+title = "Event Status",
+master = "april_event_status_enabled",
+items = {
 kb("april_event_status_enabled", "Event Status", false),
 cb("april_event_status_active_only", "Only Show Active Events", false, nil, "april_event_status_enabled"),
 cb("april_event_status_notify", "Event Notifications", true, nil, "april_event_status_enabled"),
@@ -35752,7 +35814,7 @@ sl("april_ui_window_opacity", "Window Opacity %", 45, 100, 86),
 sl("april_ui_panel_opacity", "Panel Opacity %", 35, 100, 72),
 sl("april_ui_border_strength", "Border Strength %", 10, 100, 58),
 combo("april_ui_corner_style", "Corners", { "Sharp", "Soft", "Rounded" }, 2),
-sl("april_ui_scale", "UI Scale %", 80, 125, 100),
+sl("april_ui_scale", "UI Scale %", 80, 125, 102),
 combo("april_ui_density", "Density", { "Compact", "Balanced", "Comfortable" }, 1),
 cb("april_ui_show_cursor_dot", "Cursor Dot", true),
 sep(),
@@ -35887,13 +35949,13 @@ end)()
 April._mods["ui.catalog"] = (function()
 local M = {}
 M.TABS = {
-{ id = "aim", icon = "aim", title = "Aimbot", label = "Aim" },
-{ id = "visuals", icon = "visuals", title = "Visuals", label = "Visuals" },
-{ id = "world", icon = "world", title = "World", label = "World" },
-{ id = "guns", icon = "guns", title = "Gun Mods", label = "Guns" },
-{ id = "misc", icon = "misc", title = "Misc", label = "Misc" },
-{ id = "radar", icon = "radar", title = "Radar", label = "Radar" },
-{ id = "config", icon = "config", title = "Config", label = "Config" },
+{ id = "aim", icon = "aim", title = "Combat", label = "Aim", description = "Targeting, aim behavior, and bullet control" },
+{ id = "visuals", icon = "visuals", title = "Visuals", label = "Visuals", description = "Player information, crosshair, gear, and audio" },
+{ id = "world", icon = "world", title = "World", label = "World", description = "Resources, loot, NPCs, raids, and bases" },
+{ id = "guns", icon = "guns", title = "Weapons", label = "Guns", description = "Weapon tuning and bullet tracer effects" },
+{ id = "misc", icon = "misc", title = "Movement & Utility", label = "Misc", description = "Movement, automation, protection, and events" },
+{ id = "radar", icon = "radar", title = "Radar", label = "Radar", description = "Tactical map layers and world waypoints" },
+{ id = "config", icon = "config", title = "Settings", label = "Config", description = "Appearance, motion, profiles, and extras" },
 }
 local BUILDERS = {
 aim = "ui.catalog_aim",
@@ -35921,6 +35983,248 @@ if not path then return EMPTY_GROUPS end
 local groups = April.require(path).build()
 group_cache[tab_id] = groups
 return groups
+end
+return M
+end)()
+
+April._mods["ui.search_palette"] = (function()
+local theme = April.require("ui.gs_theme")
+local input = April.require("ui.gs_input")
+local widgets = April.require("ui.gs_widgets")
+local anim = April.require("ui.gs_anim")
+local icons = April.require("ui.gs_icons")
+local state = April.require("ui.gs_state")
+local catalog = April.require("ui.catalog")
+local i18n = April.require("ui.i18n")
+local M = {}
+local QUERY_ID = "april_ui_search_query"
+local MAX_RESULTS = 8
+local entries = nil
+local results = {}
+local selected = 1
+local open = false
+local pending = nil
+local last_query = nil
+local focus_pending = false
+local function lower(value)
+    return tostring(value or ""):lower()
+end
+local function translated(value)
+    return i18n.t(tostring(value or ""))
+end
+local function add_entry(out, entry, terms)
+    local parts = {}
+    local function add(value)
+        if value ~= nil and tostring(value) ~= "" then
+            parts[#parts + 1] = tostring(value)
+        end
+    end
+    add(entry.label)
+    add(entry.tab and entry.tab.label)
+    add(entry.tab and entry.tab.title)
+    add(entry.group and entry.group.title)
+    add(entry.item and entry.item.id)
+    add(entry.item and entry.item.type)
+    if terms then
+        for i = 1, #terms do add(terms[i]) end
+    end
+    entry.haystack = lower(table.concat(parts, " "))
+    entry.label_lower = lower(entry.label)
+    entry.order = #out + 1
+    out[#out + 1] = entry
+end
+local function build_entries()
+    local out = {}
+    for tab_index, tab in ipairs(catalog.TABS) do
+        add_entry(out, {
+            kind = "Tab", label = translated(tab.title or tab.label),
+            tab = tab, tab_index = tab_index,
+        }, { tab.id, tab.description })
+        local groups = catalog.groups_for(tab.id)
+        for group_index, group in ipairs(groups) do
+            add_entry(out, {
+                kind = "Module", label = translated(group.title),
+                tab = tab, tab_index = tab_index,
+                group = group, group_index = group_index,
+            })
+            for item_index, item in ipairs(group.items or {}) do
+                if item.type ~= "separator" and item.label then
+                    local option_terms = {}
+                    for _, option in ipairs(item.options or {}) do
+                        option_terms[#option_terms + 1] = option
+                        option_terms[#option_terms + 1] = translated(option)
+                    end
+                    local kind = (item.type == "checkbox" or item.type == "keybind")
+                        and "Feature" or "Setting"
+                    add_entry(out, {
+                        kind = kind, label = translated(item.label),
+                        tab = tab, tab_index = tab_index,
+                        group = group, group_index = group_index,
+                        item = item, item_index = item_index,
+                    }, option_terms)
+                end
+            end
+        end
+    end
+    entries = out
+end
+local function match_rank(entry, query)
+    local q = lower(query):match("^%s*(.-)%s*$") or ""
+    if q == "" then return nil end
+    local cursor = 1
+    for token in q:gmatch("%S+") do
+        local found = entry.haystack:find(token, 1, true)
+        if not found then return nil end
+        cursor = cursor + found
+    end
+    if entry.label_lower == q then return 0 end
+    if entry.label_lower:sub(1, #q) == q then return 10 end
+    if entry.label_lower:find(" " .. q, 1, true) then return 20 end
+    local label_pos = entry.label_lower:find(q, 1, true)
+    if label_pos then return 30 + label_pos end
+    return 100 + cursor
+end
+local function refresh_results()
+    if not entries then build_entries() end
+    local query = tostring(state.get(QUERY_ID, ""))
+    if query == last_query then return end
+    last_query = query
+    results = {}
+    for i = 1, #entries do
+        local rank = match_rank(entries[i], query)
+        if rank then
+            results[#results + 1] = { entry = entries[i], rank = rank }
+        end
+    end
+    table.sort(results, function(a, b)
+        if a.rank == b.rank then return a.entry.order < b.entry.order end
+        return a.rank < b.rank
+    end)
+    while #results > MAX_RESULTS do results[#results] = nil end
+    selected = math.max(1, math.min(selected, #results))
+end
+function M.init()
+    state.define(QUERY_ID, "")
+end
+function M.is_open()
+    return open
+end
+function M.open()
+    open = true
+    entries = nil
+    selected = 1
+    last_query = nil
+    state.set(QUERY_ID, "")
+    focus_pending = true
+end
+function M.close()
+    open = false
+    focus_pending = false
+    widgets.blur_text_input(QUERY_ID)
+end
+function M.toggle()
+    if open then M.close() else M.open() end
+end
+function M.consume_selection()
+    local value = pending
+    pending = nil
+    return value
+end
+local function choose(entry)
+    pending = entry
+    M.close()
+end
+local function breadcrumb(entry)
+    if entry.kind == "Tab" then return translated("Open section") end
+    local tab_name = translated(entry.tab.label or entry.tab.title)
+    if entry.kind == "Module" then return tab_name end
+    return tab_name .. "  /  " .. translated(entry.group.title)
+end
+function M.draw(center_x, top_y, menu_w)
+    if not open then return end
+    if focus_pending and not input.lmb then
+        widgets.focus_text_input(QUERY_ID)
+        focus_pending = false
+    end
+    refresh_results()
+    if input.key_pressed(0x1B) then
+        M.close()
+        return
+    end
+    if #results > 0 then
+        if input.key_pressed(0x28) then
+            selected = selected % #results + 1
+        elseif input.key_pressed(0x26) then
+            selected = (selected - 2) % #results + 1
+        end
+        if input.key_pressed(0x09) then
+            state.set(QUERY_ID, results[selected].entry.label)
+            last_query = nil
+            widgets.focus_text_input(QUERY_ID)
+        elseif input.key_pressed(0x0D) then
+            choose(results[selected].entry)
+            return
+        end
+    end
+    local scale = theme.SCALE or 1
+    local pw = math.min(math.floor(570 * scale), menu_w - 36)
+    local row_h = math.floor(36 * scale)
+    local header_h = math.floor(48 * scale)
+    local footer_h = math.floor(24 * scale)
+    local result_count = #results
+    local empty_h = math.floor(58 * scale)
+    local ph = header_h + (result_count > 0 and result_count * row_h or empty_h) + footer_h
+    local px = math.floor(center_x - pw * 0.5)
+    local py = top_y
+    widgets.block_under = false
+    widgets.clip = nil
+    widgets.rect(px, py, pw, ph, theme.OVERLAY, true, theme.CORNER)
+    widgets.rect(px, py, pw, ph, theme.BORDER_HOT, false, theme.CORNER)
+    widgets.rect(px + 1, py + 1, pw - 2, header_h - 1, theme.PANEL_RAISED, true, theme.CORNER)
+    icons.draw("search", px + 22, py + math.floor(header_h * 0.5), theme.TEXT_DIM)
+    widgets.text_field(px + 38, py + 10, pw - 50, header_h - 20,
+        QUERY_ID, translated("Search features, modules, settings..."), "")
+    local list_y = py + header_h
+    if result_count == 0 then
+        local query = tostring(state.get(QUERY_ID, ""))
+        local message = query == "" and translated("Type to search every feature and module")
+            or translated("No matching features or modules")
+        widgets.text(px + 16, list_y + 18, message, theme.TEXT_DIM, theme.FONT_SMALL)
+    else
+        for i = 1, result_count do
+            local entry = results[i].entry
+            local iy = list_y + (i - 1) * row_h
+            local hot = input.hover(px + 6, iy + 2, pw - 12, row_h - 4)
+            local active = i == selected
+            local emphasis = anim.transition("search-result:" .. entry.order, active or hot, 18)
+            if emphasis > 0.01 then
+                widgets.rect(px + 6, iy + 2, pw - 12, row_h - 4,
+                    theme.alpha(active and theme.NAV_ACTIVE or theme.HOVER,
+                        0.42 + emphasis * 0.30), true, theme.CORNER_SMALL)
+            end
+            if active then
+                widgets.rect(px + 8, iy + 8, 2, row_h - 16, theme.ACCENT, true, 1)
+            end
+            widgets.text(px + 16, iy + 6, entry.label,
+                active and theme.TEXT_ACTIVE or theme.TEXT, theme.FONT)
+            local crumb = breadcrumb(entry)
+            widgets.text(px + 16, iy + 21, crumb, theme.TEXT_DIM, theme.FONT_CAPTION)
+            local kind_w = #entry.kind * math.max(5, theme.FONT_CAPTION * 0.52)
+            widgets.text(px + pw - 16 - kind_w, iy + 11,
+                translated(entry.kind), theme.TEXT_DIM, theme.FONT_CAPTION)
+            if input.clicked(px + 6, iy + 2, pw - 12, row_h - 4) then
+                choose(entry)
+                return
+            end
+            if hot then selected = i end
+        end
+    end
+    local footer_y = py + ph - footer_h
+    widgets.rect(px + 1, footer_y, pw - 2, 1, theme.BORDER_SOFT, true)
+    widgets.text(px + 14, footer_y + 6,
+        translated("Tab autocomplete   Up/Down navigate   Enter open   Esc close"),
+        theme.TEXT_DIM, theme.FONT_CAPTION)
+    widgets.block_under = true
 end
 return M
 end)()
@@ -36557,6 +36861,7 @@ local catalog = April.require("ui.catalog")
 local state = April.require("ui.gs_state")
 local hud_dock = April.require("ui.hud_dock")
 local menu_fx = April.require("ui.menu_fx")
+local search_palette = April.require("ui.search_palette")
 local M = {}
 local TOGGLE_VK_DEFAULT = 0x2D
 local function menu_toggle_vk()
@@ -36573,15 +36878,19 @@ local win_x, win_y = 80, 80
 local scroll = { left = 0, right = 0 }
 local scroll_visual = { left = 0, right = 0 }
 local middle_scroll = nil
+local scrollbar_drag = nil
 local collapsed_groups = {}
 local last_menu_rect = nil
 local group_layout_cache = {}
+local search_focus = nil
+local search_scroll_pending = false
 local SCROLL_EDGE = 36
 local SCROLL_SPEED = 5
 local WHEEL_STEP = 48
 local PAGE_STEP = 90
 local MIDDLE_DRAG_SCALE = 1.35
 local VK_PRIOR, VK_NEXT = 0x21, 0x22
+local SEARCH_HIGHLIGHT_SECONDS = 1.8
 local function screen_size()
 if draw and draw.get_screen_size then
 return draw.get_screen_size()
@@ -36645,6 +36954,9 @@ end
 return v == true or v == 1
 end
 local function item_visible(item, group)
+if search_focus and search_focus.group == group and search_focus.item == item then
+return true
+end
 if group and group.master then
 if item.id == group.master then
 return true
@@ -36781,15 +37093,68 @@ view_h = view_h or h
 local max_scroll = clamp_scroll(scroll_key, content_h, view_h)
 if max_scroll <= 0 then
 scroll[scroll_key] = 0
+if scrollbar_drag and scrollbar_drag.key == scroll_key then
+scrollbar_drag = nil
+end
 return
 end
-local thumb_h = math.max(28, math.min(68, h * (view_h / content_h)))
+local rail_x = x
+local rail_y = y + 2
+local rail_w = math.max(7, math.floor(7 * (theme.SCALE or 1)))
+local rail_h = h - 4
+local thumb_h = math.max(36, math.min(88, rail_h * (view_h / content_h)))
 local visual = scroll_visual[scroll_key] or scroll[scroll_key]
 visual = math.max(0, math.min(max_scroll, visual))
 local t = visual / max_scroll
-local thumb_y = y + t * (h - thumb_h)
-widgets.rect(x + 1, y, 2, h, theme.alpha(theme.SLIDER_BG, 0.28), true, 1)
-anim.draw_scroll_thumb(x, thumb_y, 3, thumb_h)
+local travel = math.max(1, rail_h - thumb_h)
+local thumb_y = rail_y + t * travel
+local thumb_x = rail_x + 1
+local thumb_w = rail_w - 2
+local rail_hot = gin.hover(rail_x - 2, rail_y, rail_w + 4, rail_h)
+local thumb_hot = gin.hover(thumb_x - 2, thumb_y - 2, thumb_w + 4, thumb_h + 4)
+if scrollbar_drag and scrollbar_drag.key == scroll_key then
+if gin.lmb then
+local raw_t = (gin.my - rail_y - scrollbar_drag.offset_y) / travel
+raw_t = math.max(0, math.min(1, raw_t))
+scroll[scroll_key] = raw_t * max_scroll
+scroll_visual[scroll_key] = scroll[scroll_key]
+t = raw_t
+thumb_y = rail_y + t * travel
+widgets.interacted = true
+else
+scrollbar_drag = nil
+end
+elseif gin.lmb_click and rail_hot and not widgets.block_under then
+local offset_y = thumb_h * 0.5
+if thumb_hot then offset_y = gin.my - thumb_y end
+scrollbar_drag = { key = scroll_key, offset_y = offset_y }
+local raw_t = (gin.my - rail_y - offset_y) / travel
+raw_t = math.max(0, math.min(1, raw_t))
+scroll[scroll_key] = raw_t * max_scroll
+scroll_visual[scroll_key] = scroll[scroll_key]
+thumb_y = rail_y + raw_t * travel
+widgets.interacted = true
+end
+local active = scrollbar_drag and scrollbar_drag.key == scroll_key
+local emphasis = anim.transition("scrollbar:" .. scroll_key, rail_hot or active, 18)
+widgets.rect(rail_x, rail_y, rail_w, rail_h,
+theme.alpha(theme.PANEL_RAISED, 0.54 + emphasis * 0.18), true, rail_w * 0.5)
+widgets.rect(rail_x, rail_y, rail_w, rail_h,
+theme.alpha(theme.BORDER_SOFT, 0.42 + emphasis * 0.28), false, rail_w * 0.5)
+widgets.rect(rail_x + math.floor(rail_w * 0.5), rail_y + 5, 1, rail_h - 10,
+theme.alpha(theme.SLIDER_BG, 0.34 + emphasis * 0.18), true, 1)
+if emphasis > 0.01 then
+widgets.rect(thumb_x - 1, thumb_y - 2, thumb_w + 2, thumb_h + 4,
+theme.alpha(theme.ACCENT, emphasis * 0.16), true, thumb_w * 0.5 + 1)
+end
+widgets.rect(thumb_x, thumb_y, thumb_w, thumb_h,
+theme.alpha(theme.ACCENT_DIM, 0.72 + emphasis * 0.18), true, thumb_w * 0.5)
+if thumb_h > 6 then
+anim.draw_scroll_thumb(thumb_x + 1, thumb_y + 2,
+math.max(2, thumb_w - 2), thumb_h - 4)
+end
+widgets.rect(thumb_x + 1, thumb_y + 3, 1, math.max(2, thumb_h - 6),
+theme.alpha(theme.TEXT_ACTIVE, 0.14 + emphasis * 0.16), true, 1)
 end
 local function handle_column_scroll(x, y, w, h, scroll_key, content_h)
 local max_scroll = clamp_scroll(scroll_key, content_h, h)
@@ -36842,13 +37207,32 @@ scroll[scroll_key] = scroll[scroll_key] + SCROLL_SPEED
 clamp_scroll(scroll_key, content_h, h)
 end
 end
-local function draw_group_title(x, box_top, w, title, collapsed, hot)
+local function focus_strength(group, item)
+if not search_focus or search_focus.group ~= group or search_focus.item ~= item then
+return 0
+end
+local elapsed = anim.now() - search_focus.started_at
+if elapsed >= SEARCH_HIGHLIGHT_SECONDS then return 0 end
+local fade = 1 - elapsed / SEARCH_HIGHLIGHT_SECONDS
+return math.min(1, fade * 1.8)
+end
+local function draw_group_title(x, box_top, w, title, collapsed, hot, active, focus)
 local hover = anim.transition("group-header:" .. tostring(title), hot, anim.motion_rate(16))
-if hover > 0.01 then
+if focus > 0.01 then
+widgets.rect(x + 4, box_top + 3, w - 8, theme.GROUP_HEADER_H - 6,
+theme.alpha(theme.ACCENT_DIM, 0.32 + focus * 0.34), true, theme.CORNER_SMALL)
+widgets.rect(x + 5, box_top + 6, 2, theme.GROUP_HEADER_H - 12,
+theme.alpha(theme.ACCENT, focus), true, 1)
+elseif hover > 0.01 then
 widgets.rect(x + 5, box_top + 4, w - 10, theme.GROUP_HEADER_H - 8,
 theme.alpha(theme.HOVER, hover * 0.45), true, theme.CORNER_SMALL)
 end
-widgets.text(x + 14, box_top + 8, title, theme.TEXT_ACTIVE, theme.FONT_TITLE)
+if active then
+widgets.rect(x + 5, box_top + 8, 2, theme.GROUP_HEADER_H - 16,
+theme.ACCENT, true, 1)
+end
+widgets.text(x + 14, box_top + 8, title,
+active and theme.TEXT_ACTIVE or theme.TEXT, theme.FONT_TITLE)
 local cx = x + w - 16
 local cy = box_top + theme.GROUP_HEADER_H * 0.5
 local line = draw and (draw.line or draw.Line)
@@ -36864,12 +37248,16 @@ local visible_groups = {}
 for _, group in ipairs(groups) do
 if group_visible(group) then
 local collapse_key = scroll_key .. ":" .. tostring(group.title)
+if search_focus and search_focus.group == group then
+collapsed_groups[collapse_key] = false
+end
 local collapsed = collapsed_groups[collapse_key] == true
 local expanded = anim.transition(
 "group-expand:" .. collapse_key,
 not collapsed,
 anim.motion_rate(18)
 )
+if search_focus and search_focus.group == group then expanded = 1 end
 if collapsed and expanded < 0.02 then expanded = 0 end
 if not collapsed and expanded > 0.98 then expanded = 1 end
 local full_h = content_height(group.items or {}, group)
@@ -36894,6 +37282,7 @@ scroll[scroll_key],
 anim.motion_rate(18)
 )
 local gy = y + pad - scroll_visual[scroll_key]
+local focus_screen_y = nil
 widgets.clip = { x = x, y = y, w = w, h = h }
 for _, entry in ipairs(visible_groups) do
 local group = entry.group
@@ -36902,6 +37291,21 @@ local inner_h = entry.inner_h
 local box_h = inner_h + theme.GROUP_HEADER_H
 local box_top = gy
 local box_bot = gy + box_h
+if search_focus and search_focus.group == group and search_focus.item == nil then
+focus_screen_y = box_top + theme.GROUP_HEADER_H * 0.5
+elseif search_focus and search_focus.group == group and search_focus.item then
+local target_y = gy + theme.GROUP_HEADER_H + 6
+for _, candidate in ipairs(items) do
+if item_visible(candidate, group) then
+local target_h = widgets.estimate_height(candidate)
+if candidate == search_focus.item then
+focus_screen_y = target_y + target_h * 0.5
+break
+end
+target_y = target_y + target_h + theme.ITEM_GAP
+end
+end
+end
 if box_bot > y and box_top < y + h then
 local vis_y = math.max(box_top, y)
 local vis_b = math.min(box_bot, y + h)
@@ -36914,7 +37318,9 @@ widgets.rect(x + 1, box_top + 1, w - 2, theme.GROUP_HEADER_H - 2,
 theme.alpha(theme.PANEL_ALT, 0.42), true, theme.CORNER)
 local header_hot = gin.hover(x, box_top, w, theme.GROUP_HEADER_H)
 local i18n = April.require("ui.i18n")
-draw_group_title(x, box_top, w, i18n.t(group.title), entry.collapsed, header_hot)
+draw_group_title(x, box_top, w, i18n.t(group.title), entry.collapsed,
+header_hot, group.master and master_on(group.master),
+focus_strength(group, nil))
 if gin.clicked(x, box_top, w, theme.GROUP_HEADER_H)
 and not widgets.block_under
 and not widgets.open_combo and not widgets.open_multi
@@ -36932,6 +37338,14 @@ for _, item in ipairs(items) do
 if item_visible(item, group) then
 local est = widgets.estimate_height(item)
 if iy >= y and iy + est <= y + h and iy + est <= reveal_bottom then
+local focus = focus_strength(group, item)
+if focus > 0.01 then
+widgets.rect(ix - 2, iy - 2, iw + 4, est + 4,
+theme.alpha(theme.ACCENT_DIM, 0.28 + focus * 0.34),
+true, theme.CORNER_SMALL)
+widgets.rect(ix - 2, iy + 3, 2, math.max(4, est - 6),
+theme.alpha(theme.ACCENT, focus), true, 1)
+end
 local used = widgets.draw_item(item, ix, iy, iw)
 if used < 1 then used = est end
 iy = iy + used + theme.ITEM_GAP
@@ -36944,8 +37358,14 @@ end
 gy = gy + box_h + theme.GROUP_GAP
 end
 widgets.clip = nil
+if search_scroll_pending and focus_screen_y then
+scroll[scroll_key] = scroll[scroll_key] + focus_screen_y - (y + h * 0.42)
+clamp_scroll(scroll_key, total, h)
+scroll_visual[scroll_key] = scroll[scroll_key]
+search_scroll_pending = false
+end
 handle_column_scroll(x, y, w, h, scroll_key, total)
-draw_scrollbar(x + w - 5, y + pad, h - pad * 2, total, scroll_key, h)
+draw_scrollbar(x + w - 9, y + pad, h - pad * 2, total, scroll_key, h)
 end
 local function split_groups(groups, tab_id)
 local cached = group_layout_cache[tab_id]
@@ -36987,7 +37407,7 @@ state.define("april_ui_window_opacity", 86)
 state.define("april_ui_panel_opacity", 72)
 state.define("april_ui_border_strength", 58)
 state.define("april_ui_corner_style", 2)
-state.define("april_ui_scale", 100)
+state.define("april_ui_scale", 102)
 state.define("april_ui_density", 1)
 state.define("april_ui_motion_profile", 1)
 state.define("april_ui_reduce_motion", false)
@@ -37025,6 +37445,7 @@ state.define_color("april_ui_col_scroll", theme.ACCENT)
 state.define_color("april_ui_col_sidebar", theme.ACCENT)
 state.define_color("april_ui_col_checkbox", theme.ACCENT)
 state.define_color("april_ui_col_overlay", theme.ACCENT)
+search_palette.init()
 hud_dock.init()
 if state.get_key("april_ui_menu_key") == 0 then
 state.set_key("april_ui_menu_key", TOGGLE_VK_DEFAULT)
@@ -37068,6 +37489,29 @@ hud_dock.begin_frame()
 widgets.tick_key_listen()
 widgets.tick_slider_input()
 widgets.tick_text_input()
+local search_result = search_palette.consume_selection()
+if search_result then
+tab_index = search_result.tab_index or tab_index
+scroll.left, scroll.right = 0, 0
+scroll_visual.left, scroll_visual.right = 0, 0
+if search_result.group then
+search_focus = {
+group = search_result.group,
+item = search_result.item,
+started_at = anim.now(),
+}
+search_scroll_pending = true
+else
+search_focus = nil
+search_scroll_pending = false
+end
+widgets.open_combo = nil
+widgets.open_multi = nil
+end
+if search_focus and anim.now() - search_focus.started_at >= SEARCH_HIGHLIGHT_SECONDS then
+search_focus = nil
+search_scroll_pending = false
+end
 local open_progress = anim.menu_open_progress(open)
 if not open and open_progress <= 0.015 then
 settled_closed = true
@@ -37121,7 +37565,27 @@ author_size,
 1.8,
 0.88
 )
+local search_w = math.max(28, math.floor(30 * (theme.SCALE or 1)))
+local search_h = math.max(22, math.floor(24 * (theme.SCALE or 1)))
+local search_x = x + math.floor((w - search_w) * 0.5)
+local search_y = y + math.floor((title_h - search_h) * 0.5) + 2
+local search_hot = gin.hover(search_x, search_y, search_w, search_h)
+local search_emphasis = anim.transition("title-search", search_hot or search_palette.is_open(), 18)
+if search_emphasis > 0.01 then
+widgets.rect(search_x, search_y, search_w, search_h,
+theme.alpha(search_palette.is_open() and theme.NAV_ACTIVE or theme.HOVER,
+0.38 + search_emphasis * 0.34), true, theme.CORNER_SMALL)
+end
+icons.draw("search", search_x + search_w * 0.5, search_y + search_h * 0.5,
+search_emphasis > 0.3 and theme.TEXT_ACTIVE or theme.TEXT_DIM)
+if gin.clicked(search_x, search_y, search_w, search_h) then
+search_palette.toggle()
+end
+if search_palette.is_open() then
+widgets.block_under = true
+end
 if gin.lmb_click and gin.hover(x, y, w, title_h + 5)
+and not gin.hover(search_x, search_y, search_w, search_h)
 and not widgets.active_slider and not widgets.active_slider_input and not widgets.listening_key
 and not widgets.active_input
 and not widgets.block_under
@@ -37162,6 +37626,7 @@ widgets.draw_color_overlay()
 widgets.draw_bind_mode_overlay()
 widgets.draw_color_ctx_overlay()
 widgets.draw_tooltip_overlay()
+search_palette.draw(x + w * 0.5, y + title_h + 7, w)
 widgets.end_popups()
 if open then
 gin.draw_cursor()

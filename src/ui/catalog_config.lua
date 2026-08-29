@@ -29,7 +29,7 @@ function M.build()
             sl("april_ui_panel_opacity", "Panel Opacity %", 35, 100, 72),
             sl("april_ui_border_strength", "Border Strength %", 10, 100, 58),
             combo("april_ui_corner_style", "Corners", { "Sharp", "Soft", "Rounded" }, 2),
-            sl("april_ui_scale", "UI Scale %", 80, 125, 100),
+            sl("april_ui_scale", "UI Scale %", 80, 125, 102),
             combo("april_ui_density", "Density", { "Compact", "Balanced", "Comfortable" }, 1),
             cb("april_ui_show_cursor_dot", "Cursor Dot", true),
             sep(),

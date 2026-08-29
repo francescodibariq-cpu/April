@@ -60,6 +60,7 @@ Visible layout lives in the catalog:
 | `ui/catalog_config.lua` | Appearance / config save |
 
 `ui/custom_menu.lua` draws the window (INSERT). `ui/hud_dock.lua` is the top-bar panel toggles (binds, staff, events, map, announcer).
+`ui/search_palette.lua` indexes every tab, group, control, option, and setting id. Search navigation returns a catalog target to `custom_menu.lua`, which handles tab selection, group expansion, autoscroll, and the temporary highlight without mutating feature values.
 
 Adding a control: default in the feature's `register_menu()`, layout row in the matching `catalog_*.lua`. Labels must stay unique within a tab+group.
 

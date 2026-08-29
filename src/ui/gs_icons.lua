@@ -115,6 +115,10 @@ function M.draw(name, cx, cy, col)
             )
         end
 
+    elseif name == "search" then
+        circle(cx - 1.8, cy - 1.8, 5.2, col, false, 22)
+        line(cx + 2.1, cy + 2.1, cx + 7.2, cy + 7.2, col, 1.8)
+
     elseif name == "keybinds" then
         rect(cx - 8, cy - 6, 16, 12, col, false, 2)
         for row = 0, 1 do

@@ -10,13 +10,13 @@
 local M = {}
 
 M.TABS = {
-    { id = "aim", icon = "aim", title = "Aimbot", label = "Aim" },
-    { id = "visuals", icon = "visuals", title = "Visuals", label = "Visuals" },
-    { id = "world", icon = "world", title = "World", label = "World" },
-    { id = "guns", icon = "guns", title = "Gun Mods", label = "Guns" },
-    { id = "misc", icon = "misc", title = "Misc", label = "Misc" },
-    { id = "radar", icon = "radar", title = "Radar", label = "Radar" },
-    { id = "config", icon = "config", title = "Config", label = "Config" },
+    { id = "aim", icon = "aim", title = "Combat", label = "Aim", description = "Targeting, aim behavior, and bullet control" },
+    { id = "visuals", icon = "visuals", title = "Visuals", label = "Visuals", description = "Player information, crosshair, gear, and audio" },
+    { id = "world", icon = "world", title = "World", label = "World", description = "Resources, loot, NPCs, raids, and bases" },
+    { id = "guns", icon = "guns", title = "Weapons", label = "Guns", description = "Weapon tuning and bullet tracer effects" },
+    { id = "misc", icon = "misc", title = "Movement & Utility", label = "Misc", description = "Movement, automation, protection, and events" },
+    { id = "radar", icon = "radar", title = "Radar", label = "Radar", description = "Tactical map layers and world waypoints" },
+    { id = "config", icon = "config", title = "Settings", label = "Config", description = "Appearance, motion, profiles, and extras" },
 }
 
 local BUILDERS = {

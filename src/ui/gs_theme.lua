@@ -154,7 +154,7 @@ function M.sync()
     last_sync_frame = frame
     local preset_idx = math.floor(clamp(setting("april_ui_theme_preset", 0), 0, #PRESETS - 1)) + 1
     local p = PRESETS[preset_idx] or PRESETS[1]
-    local scale = clamp(setting("april_ui_scale", 100), 80, 125) * 0.01
+    local scale = clamp(setting("april_ui_scale", 102), 80, 125) * 0.01
     local density = math.floor(clamp(setting("april_ui_density", 1), 0, 2))
     local density_mul = ({ 0.88, 1.0, 1.12 })[density + 1]
     local window_alpha = clamp(setting("april_ui_window_opacity", 86), 45, 100) * 0.01
@@ -233,19 +233,19 @@ function M.sync()
     M.HOVER = mix_rgb(p.panel, p.raised, 0.48, 0.68)
     M.FOCUS = rgb(p.accent, 0.72)
 
-    M.FONT = scaled(13, scale)
+    M.FONT = scaled(14, scale)
     M.FONT_SMALL = scaled(12, scale)
-    M.FONT_TITLE = scaled(12, scale)
+    M.FONT_TITLE = scaled(13, scale)
     M.FONT_CAPTION = scaled(11, scale)
-    M.FONT_BRAND = scaled(15, scale)
+    M.FONT_BRAND = scaled(16, scale)
 
-    M.WINDOW_W = scaled(820, scale)
-    M.WINDOW_H = scaled(560, scale)
-    M.TITLEBAR_H = scaled(30 * density_mul, scale)
-    M.NAV_H = scaled(42 * density_mul, scale)
+    M.WINDOW_W = scaled(900, scale)
+    M.WINDOW_H = scaled(620, scale)
+    M.TITLEBAR_H = scaled(34 * density_mul, scale)
+    M.NAV_H = scaled(46 * density_mul, scale)
     M.NAVBAR_H = M.NAV_H
-    M.NAV_ITEM_H = scaled(34 * density_mul, scale)
-    M.NAV_ITEM_MIN_W = scaled(78, scale)
+    M.NAV_ITEM_H = scaled(36 * density_mul, scale)
+    M.NAV_ITEM_MIN_W = scaled(84, scale)
     M.NAV_ITEM_GAP = scaled(4, scale)
     M.NAV_GAP = M.NAV_ITEM_GAP
     M.NAV_PAD_X = scaled(12, scale)
@@ -269,9 +269,9 @@ function M.sync()
     M.TAB_H = scaled(48 * density_mul, scale)
     M.GROUP_PAD = scaled(12, scale)
     M.GROUP_GAP = scaled(12 * density_mul, scale)
-    M.GROUP_HEADER_H = scaled(30 * density_mul, scale)
-    M.ROW_H = scaled(26 * density_mul, scale)
-    M.ITEM_GAP = scaled(8 * density_mul, scale)
+    M.GROUP_HEADER_H = scaled(32 * density_mul, scale)
+    M.ROW_H = scaled(28 * density_mul, scale)
+    M.ITEM_GAP = scaled(9 * density_mul, scale)
     M.LABEL_H = scaled(16 * density_mul, scale)
     M.LABEL_GAP = scaled(8 * density_mul, scale)
     M.CTRL_H = scaled(20 * density_mul, scale)
