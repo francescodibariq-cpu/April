@@ -125,7 +125,6 @@ const ORDER = [
   "features/radar/tactical_map.lua",
   "features/utility/keybind_viewer.lua",
   "features/utility/anti_afk.lua",
-  "features/utility/card_doors.lua",
   "features/utility/anime_announcer.lua",
   "features/utility/config.lua",
   "ui/gs_theme.lua",
@@ -173,7 +172,7 @@ if (orphanSrc.length) {
   console.warn("src/ Lua files not in bundle ORDER:\n  " + orphanSrc.join("\n  "));
 }
 
-const VERSION = "4.3.5";
+const VERSION = "4.3.6";
 
 const header = `--[[
     April Fallen - Fallen Survival for Project Vector

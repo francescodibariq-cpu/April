@@ -54,7 +54,6 @@ M.FEATURE_ORDER = {
     "features.utility.mod_checker",
     "features.utility.event_status",
     "features.utility.anti_afk",
-    "features.utility.card_doors",
     "features.utility.keybind_viewer",
     "features.utility.anime_announcer",
     "features.utility.config",

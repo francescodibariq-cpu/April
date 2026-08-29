@@ -10,7 +10,6 @@ os.chdir(root)
 lua = LuaRuntime(unpack_returned_tuples=True)
 lua.globals().SOURCE_ROOT = str(Path(sys.argv[1]).resolve()) if len(sys.argv) > 1 else str(root)
 lua.execute((root / "tests/memory_regressions.lua").read_text(encoding="utf-8"))
-lua.execute((root / "tests/card_doors.lua").read_text(encoding="utf-8"))
 
 # Compile, but never execute, source and generated runtimes against Lua 5.3.
 compile_lua = lua.eval("function(text, name) local fn, err = load(text, name); assert(fn, err) end")

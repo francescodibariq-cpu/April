@@ -1,5 +1,5 @@
 April = {
-    version = "4.3.5",
+    version = "4.3.6",
     debug = false,
     crash_logging = false,
     crash_trace = false,
@@ -7239,7 +7239,6 @@ local MENU_KEYS = {
     "april_npc_show_name", "april_npc_show_distance", "april_npc_range",
     "april_raid_enabled", "april_raid_enabled_mode", "april_raid_notifications", "april_raid_range",
     "april_anti_afk",
-    "april_card_doors_enabled", "april_card_doors_enabled_mode",
     "april_base_enabled", "april_base_enabled_mode", "april_base_cabinet", "april_storage_cabinet", "april_small_box", "april_large_box",
     "april_sleeping_bag", "april_auto_turret", "april_auto_turret_ring", "april_shotgun_turret", "april_shotgun_turret_ring",
     "april_wooden_door", "april_wooden_double_door", "april_salvaged_door", "april_metal_door",
@@ -7332,7 +7331,6 @@ local LEGACY_HOTKEY_TO_CHECKBOX = {
     april_mod_checker_enabled_key = "april_mod_checker_enabled",
 }
 local HOTKEY_KEYS = {
-    "april_card_doors_enabled",
     "april_gunmods_enabled",
     "april_autofarm",
     "april_farm_helper",
@@ -29537,73 +29535,6 @@ function M.draw() end
 return M
 end)()
 
-April._mods["features.utility.card_doors"] = (function()
-local settings = April.require("core.settings")
-local menu_util = April.require("core.menu_util")
-local notify = April.require("core.notify")
-local M = {}
-local P = "april_card_doors_enabled"
-local KEY = "InteractDistance"
-local DISTANCE = 5
-local REFRESH_MS = 3000
-local was_enabled = false
-local attempted = false
-local next_refresh = 0
-local notice_state = nil
-local function now_ms()
-    local fn = utility and (utility.get_tick_count or utility.GetTickCount)
-    return type(fn) == "function" and fn() or 0
-end
-local function report(state, message, kind)
-    if notice_state == state then return end
-    notice_state = state
-    notify.toast(message, kind, 2500, true)
-end
-local function patch(fn, value)
-    local ok, count = pcall(fn, KEY, value)
-    return ok and type(count) == "number" and count > 0
-end
-function M.register_menu()
-    local G = menu_util.G.MISC
-    menu_util.register_keybind(menu_util.group(G), G, P, "Open card doors", false,
-        { key = 0, default_mode = 2 })
-end
-function M.update(_dt)
-    local enabled = settings.enabled(P)
-    local changed = enabled ~= was_enabled
-    if changed then
-        was_enabled = enabled
-        notice_state = nil
-    end
-    if not enabled then
-        if changed and attempted then
-            if type(setgc) == "function" and patch(setgc, 0) then
-                attempted = false
-                report("reset", "Interaction distance reset to 0.", "warning")
-            else
-                report("reset_failed", "Interaction reset failed; the previous patch may remain.", "danger")
-            end
-        end
-        return
-    end
-    local now = now_ms()
-    if not changed and now < next_refresh then return end
-    next_refresh = now + REFRESH_MS
-    if type(setgc) ~= "function" or type(applygc) ~= "function" then
-        report("unavailable", "Card-door interaction requires Vector's GC API.", "danger")
-        return
-    end
-    attempted = true
-    local fn = changed and setgc or applygc
-    if patch(fn, DISTANCE) then
-        report("applied", "Card-door reach set to 5 studs.", "success")
-    else
-        report("pending", "No interaction patch confirmed; approach a card door and retry.", "warning")
-    end
-end
-return M
-end)()
-
 April._mods["features.utility.anime_announcer"] = (function()
 local settings = April.require("core.settings")
 local menu_util = April.require("core.menu_util")
@@ -32141,7 +32072,6 @@ local STRINGS = {
     ["Manual Farm Helper"] = "Ruchnoy pomoschnik farma",
     ["Farm Range (studs)"] = "Dalnost farma (studs)",
     ["Anti AFK"] = "Anti-AFK",
-    ["Open card doors"] = "Otkryvat dveri s kartoy",
     ["Anti Fling"] = "Anti-fling",
     ["Visible Layers"] = "Vidimye sloi",
     ["NPCs"] = "NPC",
@@ -32448,7 +32378,6 @@ local TIPS = {
     april_autofarm_debug_path = "Risuet trasser k tochnoy tochke TreeX ili NodeSpark plyus tekuschee sostoyanie, distantsiyu i instrument v rukah.",
     april_farm_helper = "Ruchnaya alternativa avtofarmu. Perenapravlyaet udary mili na blizhayshuyu sovmestimuyu weak point, no dvigaetes i derzhite ataku sami.",
     april_anti_afk = "Predotvraschaet kik za prostoy, imitiruya aktivnost.",
-    april_card_doors_enabled = "Stavit InteractDistance na 5 i obnovlyaet kesh kazhdye 3 sekundy. Vyberite klavishu. VNIMANIE: menyayutsya vse polya s etim imenem, vklyuchaya drugie dveri i verstaki. Pri vyklyuchenii stavitsya 0, a ne ishodnye distantsii. Server mozhet otklonit deystvie.",
     april_mod_checker_enabled = "Preduprezhdaet, kogda personal ili mody zahodyat na server.",
     april_keybinds_enabled = "Pokazyvaet na ekrane spisok vashih bindov.",
     april_event_status_enabled = "Pokazyvaet zhivye timed crates, iventovyh NPC i bossov. BTR trekaet 13-minutnyy kuldaun luta posle unichtozheniya (reydy — tolko cherez Raid ESP).",
@@ -32875,7 +32804,6 @@ april_autofarm_debug_path = "Draws a tracer to the exact TreeX or NodeSpark poin
 april_farm_helper = "Manual alternative to Autofarm. It redirects your held melee swings to the nearest compatible weak point, but you move and hold attack yourself.",
 april_ui_russian = "Switches the entire April menu and HUD text to Russian (Latin spelling — Vector's font cannot draw Cyrillic).",
 april_anti_afk = "Prevents idle kick by simulating activity.",
-april_card_doors_enabled = "Sets InteractDistance to 5 studs and refreshes cached entries every 3 seconds. Pick a key on the chip. WARNING: Vector patches every matching field, including other doors and benches. Disabling sets all matches to 0, not their original distances. Server checks may still reject interaction.",
 april_mod_checker_enabled = "Alerts you when staff or mods join the server.",
 april_keybinds_enabled = "Shows an on-screen list of your keybinds.",
 april_event_status_enabled = "Shows live timed crates, event NPCs, and bosses. BTR tracks the 13-minute loot-fire cooldown after destroy (raids use Raid ESP only).",
@@ -35707,7 +35635,6 @@ sl("april_farm_radius", "Farm Range (studs)", 1, 10, 7, false, "april_farm_helpe
 title = "Protection & Access",
 items = {
 cb("april_anti_afk", "Anti AFK", false),
-kb("april_card_doors_enabled", "Open card doors", false),
 kb("april_antifling_enabled", "Anti Fling", false),
 },
 },
@@ -37683,7 +37610,6 @@ M.FEATURE_ORDER = {
     "features.utility.mod_checker",
     "features.utility.event_status",
     "features.utility.anti_afk",
-    "features.utility.card_doors",
     "features.utility.keybind_viewer",
     "features.utility.anime_announcer",
     "features.utility.config",

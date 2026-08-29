@@ -139,7 +139,6 @@ local MENU_KEYS = {
     "april_npc_show_name", "april_npc_show_distance", "april_npc_range",
     "april_raid_enabled", "april_raid_enabled_mode", "april_raid_notifications", "april_raid_range",
     "april_anti_afk",
-    "april_card_doors_enabled", "april_card_doors_enabled_mode",
     "april_base_enabled", "april_base_enabled_mode", "april_base_cabinet", "april_storage_cabinet", "april_small_box", "april_large_box",
     "april_sleeping_bag", "april_auto_turret", "april_auto_turret_ring", "april_shotgun_turret", "april_shotgun_turret_ring",
     "april_wooden_door", "april_wooden_double_door", "april_salvaged_door", "april_metal_door",
@@ -235,7 +234,6 @@ local LEGACY_HOTKEY_TO_CHECKBOX = {
 }
 
 local HOTKEY_KEYS = {
-    "april_card_doors_enabled",
     "april_gunmods_enabled",
     "april_autofarm",
     "april_farm_helper",

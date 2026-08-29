@@ -77,7 +77,6 @@ function M.build()
             title = "Protection & Access",
             items = {
                 cb("april_anti_afk", "Anti AFK", false),
-                kb("april_card_doors_enabled", "Open card doors", false),
                 kb("april_antifling_enabled", "Anti Fling", false),
             },
         },

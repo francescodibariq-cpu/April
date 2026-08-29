@@ -15,9 +15,6 @@ Coverage includes bounded moving-target searches, unchanged result TTLs and ray
 budgets, resumed search progress, image ownership/eviction, lazy announcer loads,
 map failure/asset-change cleanup, map disk access, existing GC retry intervals,
 the documented `applygc(payload)` signature, and frame cleanup during the intro.
-Card-door tests also exercise the real keypicker registration, toggle/hold binds,
-notifications, GC failures, config snapshot fields, and three-second maintenance
-without creating a thread or replacing the frame hook.
 
 These checks do not measure Vector's native RAM/GPU allocations. Before release,
 load the rebuilt `Script 1.lua` in a fresh Vector session and verify combat,
