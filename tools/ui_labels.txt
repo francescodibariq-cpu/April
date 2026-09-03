@@ -1,0 +1,646 @@
+ Range Ring
+ },
+            }),
+            sl(
+ }, 0),
+            combo(
+ }, { false, false }, 
+%.2f
+%d
+(no configs)
+) * 7
+end
+
+function M.init()
+    state.define(
+),
+            btn(
+),
+            cb(
+),
+            color(
+),
+            combo(
+),
+            multi(
+),
+            sep(
+),
+            sep(),
+            label(
+),
+            sl(
+),
+        },
+    }
+
+    local colors = {
+        title = 
+,
+                },
+            }),
+            color(
+,
+            }, 0),
+            cb(
+,
+            }, { false, true, false }, 
+,
+            }, { true, false, true, true, false, true }),
+            input(
+,
+        items = {
+            color(
+,
+        items = {
+            kb(
+,
+        master = 
+, 0, 20, 5, false, 
+, 0.1, 1, 1, true, 
+, 1, 10, 2, false, 
+, 1, 100, 10, false, 
+, 1, 100, 100),
+            sl(
+, 1, 100, 35, false, 
+, 1, 100, 40, false, 
+, 1, 25, 10),
+            combo(
+, 1, 4, 2, true, 
+, 1, 50, 10, false, 
+, 1, 7, 7, true, 
+, 4, 40, 18, false, 
+, 5, 600, 120),
+            sep(),
+            cb(
+, 5, 600, 150),
+            sep(),
+            cb(
+, 50, 2000, 500),
+            sep(),
+            cb(
+, 8, 24, 13),
+            btn(
+, combat_menu.AIM_AT_OPTIONS, combat_menu.AIM_AT_DEFAULTS),
+            multi(
+, combat_menu.SILENT_BONES, 0),
+            multi(
+, false)
+    state.define(
+, false),
+            cb(
+, false),
+            sep(
+, false),
+            sep(),
+            cb(
+, false),
+            sl(
+, false, nil, 
+, false, nil, { hide_color = true }),
+            sep(),
+            combo(
+, false, { 0.2, 1, 0.45, 1 }),
+            combo(
+, false, { 0.55, 0.2, 1, 1 }),
+            combo(
+, gate = gate }
+end
+
+local function ak(key_id, label, gate)
+    return { type = 
+, true),
+            sl(
+, {
+                sync_ids = {
+                    
+, {
+                sync_ids = { 
+, { 0.35, 0.85, 1, 1 }),
+            color(
+, { 0.45, 1, 0.55, 1 }),
+            color(
+, { 0.75, 0.85, 1, 1 }),
+            color(
+, { 0.82, 0.84, 0.88, 0.92 }),
+            sep(),
+            color(
+, { 0.84, 0.31, 0.80, 1 }),
+            color(
+, { 0.95, 0.9, 0.55, 0.95 }),
+            color(
+, { 1, 0.33, 0.33, 1 }),
+            color(
+, { 1, 0.35, 0.35, 1 }),
+            color(
+, { 1, 0.82, 0.2, 1 }),
+            color(
+, { 1, 1, 1, 0.92 }),
+            color(
+2D
+Accent
+Accent Colors
+Accent Speed
+Accent Style
+Adds light drift and overshoot so mouse aim feels less robotic.
+Adds spin or pulse animation to the crosshair.
+Advanced
+Advanced Animation
+Aim
+Aim At
+Aim Key
+Aimbot
+Alerts you when staff or mods join the server.
+Also toggled from the top dock.
+Alternating
+Amber Noir
+Ambient Fade Pulse
+Amount
+Animate
+Anime Baddie
+Anti AFK
+Anti Fling
+Anti-Aim
+Appearance
+Applies weapon stat changes globally to your held gun.
+April
+Arctic Frost
+Attack Heli
+Auto Turret
+Auto-jumps while you hold Space on the ground for smoother bunny hops.
+Autofarm
+Autoload
+Autoload Config Name
+Autoload on Start
+BTR
+BTR Crate
+Backdrop
+Backwards
+Balanced
+Base 3D Boxes
+Base Cabinet
+Base ESP
+Base Parts
+Base Range
+Base Show Distance
+Base Show Name
+Base Xray
+BasePart
+Bases
+Basics
+Beacon Height
+Beacon Pillar
+Binds
+Blue
+Blueberry Plant
+Boar
+Body Bag
+Border Strength %
+Boris
+Brackets
+Bruno
+Brutus
+Bubble Duration
+Bullet Speed
+Bunny Hop
+Cabinet
+Care Package
+Cham Types
+Chams Mode
+Changes the waist-up character size.
+Character
+Chatter Cooldown
+Cheater
+Choose what appears on the tactical map.
+Choose whether aimbot targets players, NPCs, or both.
+Choose whether silent aim targets players, NPCs, or both.
+Choose which NPC types appear on ESP.
+Choose which info to show on NPC ESP.
+Choose which info to show on player ESP.
+Circle
+Clan Tag
+Clear Active Waypoint
+Clear All Waypoints
+Clears every saved waypoint.
+Clears the active waypoint slot.
+Clears the aim whitelist player list.
+Clears the silent aim whitelist player list.
+Closest
+Combat / Bleed
+Comfortable
+Compact
+Config
+Config Name
+Configs
+Copper Dust
+Corn Plant
+Corner
+Corners
+Crimson Ember
+Cross
+Crosshair
+Cursor Dot
+Custom Colors
+Custom Crosshair
+Cyan
+Death / Respawn
+Debug Target Path
+Deer
+Default
+Delete Config
+Deletes the selected config file from April_configs.
+Density
+Desync
+Desync Visualize
+Desyncs your network position from where you appear.
+Diamond
+Displayed Elements
+Distance
+Diver Dave
+Dot
+Double Tap
+Downed
+Downed / Revived
+Draw Markers
+Draws 3D boxes around visible base parts.
+Draws 3D boxes around visible loot.
+Draws 3D boxes around visible resources.
+Draws a custom crosshair on screen.
+Dropped Items
+Duck Height
+ESP Filters
+ESP Flags
+EVENTS
+Emerald Glass
+Enable Aimbot
+Enable Binds, Staff, Events, Map, or April above.
+Enable Gun Mods
+Enable Snow
+Events
+Expressive
+Extra crosshair drawing options.
+Fake Duck
+Farm Range (studs)
+Farm Resources
+Fill
+Fill Glow
+Fill, Wireframe, Fill Glow, or Wireframe Glow.
+Filter which players appear on ESP.
+Filters
+Filters which targets aimbot will consider.
+Filters which targets silent aim will consider.
+Fire Rate
+Fire Rate Multiplier
+Fling
+Fling Duration
+Fling FOV
+Flow
+Fly
+Fly Noclip
+Fly Speed
+Food Crate
+GPU mesh chams on selected base structures (in-range only).
+GPU mesh chams on selected loot types (in-range only).
+GPU mesh chams on selected resource types (in-range only).
+Garage Door
+Gear FOV
+Gear Icon Size
+Glow Preset
+Glow preset color (Fill Glow / Wireframe Glow only).
+Graphite
+Green
+Gun Mods
+Gun Range
+Guns
+HUD SETTINGS
+HUD panels are managed from the top dock.
+Head
+Health Bar
+Health Check
+Held Item
+Heli Crate
+Hides inactive event rows from the event status panel.
+Higher values move the camera slower toward the target.
+Highlights NPC soldiers, bosses, helis, and BTR.
+Highlights base parts like doors, turrets, and storage.
+Highlights crates, bags, and other loot in the world.
+Highlights harvestable resources and animals in the world.
+Hitbox
+Hold or toggle this key to activate aimbot.
+Hover
+How long each speech bubble remains visible.
+How strong humanize drift and overshoot are.
+Independent FOV (pixels from crosshair) used only by Target Gear Overlay.
+Jitter
+Jitter Interval (ms)
+Jitter Step
+KEYBINDS
+Key used to open and close this menu.
+Labels
+Large Battery
+Large Box
+Large Cabinet
+Large Egg
+Large Egg / Gift
+Large Gift
+Large Storage Box
+Launches nearby entities upward.
+Left Arm
+Left Leg
+Lemon Plant
+Load Config
+Loads the selected / named config from April_configs.
+Loads your named config automatically on inject.
+Locked Metal Crate
+Locked Steel Crate
+Locked Wooden Crate
+Look
+Loot
+Loot 3D Boxes
+Loot ESP
+Loot Range
+Loot Show Distance
+Loot Show Name
+Low Health
+MAP
+Magenta
+Main Accent
+Manual
+Manual Farm Helper
+Manual Yaw
+Map
+Marks explosion clusters as potential raids.
+Max Distance
+Maximum world distance (studs) for Target Gear Overlay selection.
+Medium Battery
+Medium Egg
+Medium Egg / Gift
+Medium Gift
+Menu Overlay
+Menu Toggle Key
+Mesh Chams (GPU)
+Metal
+Metal Crate
+Metal Door
+Metal Double Door
+Metal Node
+Metal_Node
+Midnight Blue
+Military Boat
+Misc
+Mixed
+Motion
+Motion Profile
+Movement
+Moves the announcer back to the lower-left corner.
+Moves the crosshair toward your active combat target.
+Moves the tactical map back to its default spot.
+NPC Box
+NPC Colors
+NPC ESP
+NPC Range
+NPC Types
+NPCs
+Name
+Navbar
+Nearby Threats
+Neon Lime
+No Recoil
+No Spread
+No Sway
+None
+Ocean Abyss
+Oil Barrel
+Only active binds
+Only active events
+Only structural pieces within this distance get wireframe chams.
+Opacity
+Overlay Panels
+Overlay Strength
+Override For
+Overrides
+PREFAB_ANIMAL_DEER
+PREFAB_ANIMAL_WILDBOAR
+PREFAB_ANIMAL_WOLF
+Panel Opacity %
+Panel and map transparency for the tactical radar overlay.
+Per-Element Styles
+Personality
+Phosphate
+Phosphate Node
+Phosphate_Node
+Pilot Pete
+Place and navigate to saved world waypoints.
+Player Box
+Player ESP
+Player Range
+Players
+Plays a random greeting so you can test appearance and dialogue.
+Plus
+Prevents idle kick by simulating activity.
+Preview Line
+Pulse
+Pumpkin Plant
+Radar
+Radar Base Color
+Radar Blip Size
+Radar Loot Color
+Radar NPCs Color
+Radar Opacity
+Radar Players Color
+Radar Raids Color
+Radar Resources Color
+Radar Size
+Radar Waypoints Color
+Radar Zoom Level
+Raid ESP
+Raid ESP Range
+Raid Notifications
+Raids
+Rainbow
+Random
+Random Jitter
+Randomized Part
+Range Mult
+Rapidly ducks your hitbox height.
+Raspberry Plant
+React To
+Recoil Reduction %
+Red
+Redirects shots to your locked target without moving the camera.
+Reduce Motion
+Refresh List
+Reloads game module offsets and caches.
+Rescans saved configs and re-imports any old April_Slot files.
+Reset Position
+Reset Radar Position
+Reset map position
+Resource 3D Boxes
+Resource ESP
+Resource Range
+Resource Show Distance
+Resource Show Name
+Resources
+Reviving
+Right Arm
+Right Leg
+Roasty
+Rounded
+Royal Indigo
+STAFF
+Safe Zone
+Safezone
+Sakura Night
+Salvaged Flycopter
+Salvaged Metal Door
+Save Config
+Saved Configs
+Saves current settings to April_configs as ConfigName.cfg.
+Saves your current position to the active waypoint slot.
+Scale
+Scan interval
+Scrollbars
+Search Range
+Searches farther from your body when no close peek is found.
+Section Tops
+Set Active Waypoint
+Sharp
+Shotgun Turret
+Show bind mode
+Show status flags (downed, SZ, staff, revive, movement state, VIP, cheater).
+Show unbound
+Shows Boris boss NPCs on ESP.
+Shows Bruno boss NPCs on ESP.
+Shows Brutus boss NPCs on ESP.
+Shows a draggable tactical minimap overlay.
+Shows an on-screen list of your keybinds.
+Shows boxes and info on other players.
+Shows distance on base ESP.
+Shows distance on loot ESP.
+Shows distance on resource ESP.
+Shows held weapon and gear for the player closest to your crosshair.
+Shows military Soldier NPCs on ESP.
+Shows names on base ESP.
+Shows names on loot ESP.
+Shows names on resource ESP.
+Shows the Attack Heli event NPC on ESP.
+Shows the BTR event vehicle on ESP.
+Shows the BTR event vehicle on NPC ESP.
+Shows the Diver Dave vendor NPC on ESP.
+Shows the Pilot Pete vendor NPC on ESP.
+Shows the item a player is holding (same read path as Target Gear).
+Sideways Left
+Sideways Right
+Size
+Skeleton
+Skip Downed
+Skip Safezone
+Sleeper
+Sleepers
+Sleeping Bag
+Sliders
+Small Battery
+Small Box
+Small Egg
+Small Egg / Gift
+Small Gift
+Small Storage Box
+Snow
+Soft
+Solar Panel
+Soldier
+Spam Height
+Spam Interval (ms)
+Spam Max
+Spam Min
+Spam Mode
+Speed
+Speed Mult
+Spider
+Spider Speed
+Spin
+Spin Speed
+Spoofs your look direction to other players.
+Spread Reduction %
+Staff
+Startup Animation
+Static
+Stay Visible
+Steel Crate
+Steel Door
+Steel Double Door
+Stone
+Stone Node
+Stone_Node
+Storage Cabinet
+Style
+Subtle
+Supportive
+Survival Needs
+Switches
+T-Shape
+Tactical Map
+Target Gear
+Target Gear Overlay
+Target Type
+Team Check
+Theme Preset
+Timed Crate
+Title Bar
+Toast when a raid explosion is detected.
+Tomato Plant
+Top Offset
+Torso
+Trap Door
+Trash Can
+Trees
+Triangle Trap Door
+UI Scale %
+Utility
+VIP
+Violet Glass
+Visible Layers
+Visible Only
+Visuals
+Wave
+Waypoint Active Slot
+Waypoint Show Distance
+Waypoints
+Whitelist
+Whitelist IDs
+Wild Boar
+WildBoar
+Windmill
+Window Opacity %
+Wireframe
+Wireframe Glow
+Wolf
+Wooden Boat
+Wooden Crate
+Wooden Door
+Wooden Double Door
+Wool Plant
+World
+World Events
+Xray Range
+Yaw Mode
+Yellow
+_chams
+_chams_color
+_chams_mode
+core.config_store
+core.env
+core.gpu_chams
+core.settings
+double buffer
+game.esp_maps
+game.esp_scan
+hud-dock:
+hud-dock:settings
+ui.combat_labels
+ui.gs_anim
+ui.gs_icons
+ui.gs_input
+ui.gs_state
+ui.gs_theme
+ui.gs_widgets

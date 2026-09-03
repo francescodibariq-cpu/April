@@ -1,0 +1,136 @@
+april_aim_auto_pred	Leads moving targets using weapon bullet speed and drop. Off = aim the bone only. Also skips prediction when you are not holding a gun.
+april_aim_bone	Which body part the aimbot tracks. Randomized Part re-rolls every shot while holding Mouse 1.
+april_aim_filters	Filters which targets aimbot will consider.
+april_aim_humanize	Adds light drift and overshoot so mouse aim feels less robotic.
+april_aim_humanize_str	How strong humanize drift and overshoot are.
+april_aim_key	Hold or toggle this key to activate aimbot.
+april_aim_smooth	Higher values move the camera slower toward the target.
+april_aim_smooth_type	How smoothing accelerates: Linear, Ease Out, Ease In-Out, Exponential, or Adaptive.
+april_aim_sticky	While your aim key is held, stays on the first target even if they leave FOV. Releases and forgets the target when you let go of the bind.
+april_aim_targets	Choose whether aimbot targets players, NPCs, or both.
+april_aim_whitelist_clear	Clears the aim whitelist player list.
+april_aim_whitelist_ids	Comma-separated Roblox user IDs that Aimbot must ignore. Enable Whitelist inside Filters first. You can also middle-click the current player target to add or remove them.
+april_aimbot	Smooth camera aim assist on your current target. Bind a key on the chip (Always / Hold / Toggle).
+april_anime_baddie_character	Selects the announcer. More characters can be added through the character registry.
+april_anime_baddie_cooldown	Minimum delay between non-urgent comments. Death, downed, drowning, and combat can interrupt.
+april_anime_baddie_duration	How long each speech bubble remains visible.
+april_anime_baddie_enabled	Shows a draggable transparent anime announcer that reacts to local survival events. Draw-only: it creates no Roblox instances and writes nothing to Workspace.
+april_anime_baddie_events	Choose which read-only local state transitions can trigger dialogue: survival, combat status, nearby threats, and world events.
+april_anime_baddie_opacity	Changes character transparency. The speech bubble stays nearly opaque for readability.
+april_anime_baddie_personality	Mixed alternates between teasing and supportive lines; Roasty and Supportive lock the tone.
+april_anime_baddie_preview	Plays a random greeting so you can test appearance and dialogue.
+april_anime_baddie_reset	Moves the announcer back to the lower-left corner.
+april_anime_baddie_scale	Changes the waist-up character size.
+april_anime_baddie_stay	Keeps the character visible between comments. Disable for event-only popups.
+april_anti_afk	Prevents idle kick by simulating activity.
+april_antiaim_enabled	Spoofs your look direction to other players.
+april_antifling_enabled	Makes other players' character parts non-collidable on your client. Their original collision values are restored when disabled.
+april_autofarm	Automatically turns and runs to selected resources, verifies the live weak point is visible and centered, then swings using the equipped compatible tool. Vector must be the foreground window because movement and clicks use OS input.
+april_autofarm_debug_path	Draws a tracer to the exact TreeX or NodeSpark point plus the current state, distance, and held tool.
+april_autofarm_resources	Select every resource type Autofarm may visit. Your held tool must support that type: axes for trees, pickaxes for nodes, or a compatible hybrid tool.
+april_autofarm_search_range	Maximum distance in studs used when searching for the next resource. Larger ranges cover more area but can produce longer direct routes.
+april_base_boxes	Draws 3D boxes around visible base parts.
+april_base_chams	GPU mesh chams on selected base structures (in-range only).
+april_base_chams_color	Glow preset color (Fill Glow / Wireframe Glow only).
+april_base_chams_mode	Fill, Wireframe, Fill Glow, or Wireframe Glow.
+april_base_enabled	Highlights base parts like doors, turrets, and storage.
+april_base_show_distance	Shows distance on base ESP.
+april_base_show_name	Shows names on base ESP.
+april_base_xray_enabled	Wireframe mesh chams on structural walls/floors/foundations (Detail meshes). ApplyChams only — no Material/Texture/Transparency writes, no new instances. Skips Base ESP targets (doors, boxes, turrets, cabinets).
+april_base_xray_range	Only structural pieces within this distance get wireframe chams.
+april_bhop_enabled	Auto-jumps while you hold Space on the ground for smoother bunny hops.
+april_bullet_body_peek	Moves you to the peek with desync for server-valid shots. Can cause invalids or kicks.
+april_bullet_enabled	Master toggle for advanced bullet routing (hitscan, bullet TP, silent manip). Bind Always / Hold / Toggle from the key chip.
+april_cfg_autoload	Loads your named config automatically on inject.
+april_cfg_autoload_config	Config name to load on start. Falls back to your old Autoload Slot if needed.
+april_cfg_delete	Deletes the selected config file from April_configs.
+april_cfg_load	Loads the selected / named config from April_configs.
+april_cfg_profile_name	Name used when saving. Saved as April_configs\\Name.cfg when possible, otherwise April_Config_Name.cfg in Scripts. Old slot files are imported automatically.
+april_cfg_refresh	Rescans saved configs and re-imports any old April_Slot files.
+april_cfg_save	Saves current settings to April_configs as ConfigName.cfg.
+april_cfg_selected	Pick a saved/imported config. Selecting it fills Config Name.
+april_crosshair_enabled	Draws a custom crosshair on screen.
+april_crosshair_follow	Moves the crosshair toward your active combat target.
+april_desync_enabled	Desyncs your network position from where you appear.
+april_event_status_active_only	Hides inactive event rows from the event status panel.
+april_event_status_enabled	Shows live timed crates, event NPCs, and bosses. BTR tracks the 13-minute loot-fire cooldown after destroy (raids use Raid ESP only).
+april_fakeduck_enabled	Rapidly ducks your hitbox height.
+april_farm_helper	Manual alternative to Autofarm. It redirects your held melee swings to the nearest compatible weak point, but you move and hold attack yourself.
+april_fling_enabled	Launches nearby entities upward.
+april_fly_enabled	Camera-relative HRP velocity fly (WASD + Space/Ctrl). Built-in duck (HipHeight 0.01) and jump state while airborne — does not toggle Fake Duck. Never changes WalkSpeed or JumpPower.
+april_fly_noclip	Disables collision on your key character parts while flying. Collision is restored when you land or turn Fly off.
+april_gm_double_tap	Forces a 2-round burst on your held gun. Patches ToolInfo directly — does not use GC mults.
+april_gm_fire_rate	Boosts RPM via FireRateMult. Usually needs Muzzle Boost on the gun — without it the game often ignores fire-rate mults.
+april_gm_range	Extends max range via RangeMult. Silencer and Compensator reduce range; this patches whatever range mults exist on your gun.
+april_gm_recoil	Lowers recoil. Works on any gun — no attachment required.
+april_gm_speed	Boosts bullet speed via SpeedMult on live weapon tables. Not an attachment stat — Swift Heavy Ammo also adds speed; equip a gun before enabling.
+april_gm_spread	Tightens aim and hip spread. Sights (Holo, ACOG, scopes) also add spread mults that this stacks with.
+april_gm_sway	Removes scope sway while aiming. Only affects guns with a scope or sight equipped.
+april_gunmods_enabled	Applies weapon stat changes globally to your held gun.
+april_keybinds_enabled	Shows an on-screen list of your keybinds.
+april_loot_boxes	Draws 3D boxes around visible loot.
+april_loot_chams	GPU mesh chams on selected loot types (in-range only).
+april_loot_chams_color	Glow preset color (Fill Glow / Wireframe Glow only).
+april_loot_chams_mode	Fill, Wireframe, Fill Glow, or Wireframe Glow.
+april_loot_enabled	Highlights crates, bags, and other loot in the world.
+april_loot_show_distance	Shows distance on loot ESP.
+april_loot_show_name	Shows names on loot ESP.
+april_map_enabled	Shows a draggable tactical minimap overlay.
+april_map_opacity	Panel and map transparency for the tactical radar overlay.
+april_map_reset_position	Moves the tactical map back to its default spot.
+april_mod_checker_enabled	Alerts you when staff or mods join the server.
+april_npc_attack_heli	Shows the Attack Heli event NPC on ESP.
+april_npc_boris	Shows Boris boss NPCs on ESP.
+april_npc_bruno	Shows Bruno boss NPCs on ESP.
+april_npc_brutus	Shows Brutus boss NPCs on ESP.
+april_npc_btr	Shows the BTR event vehicle on ESP.
+april_npc_diver_dave	Shows the Diver Dave vendor NPC on ESP.
+april_npc_enabled	Highlights NPC soldiers, bosses, helis, and BTR.
+april_npc_pilot_pete	Shows the Pilot Pete vendor NPC on ESP.
+april_npc_soldier	Shows military Soldier NPCs on ESP.
+april_player_enabled	Shows boxes and info on other players.
+april_player_esp_filters	Filter which players appear on ESP.
+april_player_esp_flags	Show status flags (downed, SZ, staff, revive, movement state, VIP, cheater).
+april_player_show_held	Shows the item a player is holding (same read path as Target Gear).
+april_raid_enabled	Marks explosion clusters as potential raids.
+april_raid_notifications	Toast when a raid explosion is detected.
+april_reload_modules	Reloads game module offsets and caches.
+april_silent_aim	Redirects shots to your locked target without moving the camera.
+april_silent_bone	Which body part silent aim tracks. Randomized Part re-rolls every shot while holding Mouse 1.
+april_silent_bullet_manip	Finds a shootable angle around cover. Server may reject invalid shots.
+april_silent_bullet_tp	Scans the head for the closest visible point to your crosshair (manip-style math), spawns the ray on the target, and shoots through that point. Cycles offsets every frame.
+april_silent_filters	Filters which targets silent aim will consider.
+april_silent_hit_chance	Chance each shot applies silent aim while holding Mouse 1. Rolls independently per shot using your gun's fire rate (not once for the whole spray).
+april_silent_hitscan	Registers hits instantly on your locked target. Server may reject invalid shots.
+april_silent_manip_extend	Searches farther from your body when no close peek is found.
+april_silent_sticky	Locks onto the first valid target and stays on them until they leave your FOV or become invalid.
+april_silent_targets	Choose whether silent aim targets players, NPCs, or both.
+april_silent_whitelist_clear	Clears the silent aim whitelist player list.
+april_silent_whitelist_ids	Comma-separated Roblox user IDs that Silent Aim must ignore. Enable Whitelist inside Filters first. You can also middle-click the current player target to add or remove them.
+april_spider_enabled	Climbs upward while you press into a nearby wall. It pulses the jump state only after multi-height wall checks, reducing wall snap-back.
+april_target_overlay	Shows held weapon and gear for the player closest to your crosshair.
+april_target_overlay_fov	Independent FOV (pixels from crosshair) used only by Target Gear Overlay.
+april_target_overlay_max_dist	Maximum world distance (studs) for Target Gear Overlay selection.
+april_thick_bullet	Expands other players' head hitboxes on your client and fades them. Player ESP boxes still use natural head size so Override Size stays hidden. Helps local hit tests; the server can still reject shots that only clip the inflated shell.
+april_thick_bullet_mult	How large enemy head hitboxes become (1x = normal, up to 4x). ESP boxes stay normal-sized.
+april_ui_crosshair_motion	Adds spin or pulse animation to the crosshair.
+april_ui_crosshair_options	Extra crosshair drawing options.
+april_ui_menu_key	Key used to open and close this menu.
+april_ui_menu_overlay	Darkens the whole screen behind the menu with a smooth fade. Does not cover menu controls.
+april_ui_npc_elements	Choose which info to show on NPC ESP.
+april_ui_npc_types	Choose which NPC types appear on ESP.
+april_ui_player_elements	Choose which info to show on player ESP.
+april_ui_radar_layers	Choose what appears on the tactical map.
+april_ui_snow	Soft falling snow behind the menu. Hidden when Reduce Motion is on.
+april_ui_startup_intro	Plays the April.lua intro whenever the script executes. Save it in your autoload profile.
+april_waypoints_enabled	Place and navigate to saved world waypoints.
+april_world_boxes	Draws 3D boxes around visible resources.
+april_world_chams	GPU mesh chams on selected resource types (in-range only).
+april_world_chams_color	Glow preset color (Fill Glow / Wireframe Glow only).
+april_world_chams_mode	Fill, Wireframe, Fill Glow, or Wireframe Glow.
+april_world_enabled	Highlights harvestable resources and animals in the world.
+april_world_show_distance	Shows distance on resource ESP.
+april_world_show_name	Shows names on resource ESP.
+april_wp_clear	Clears the active waypoint slot.
+april_wp_clear_all	Clears every saved waypoint.
+april_wp_set	Saves your current position to the active waypoint slot.

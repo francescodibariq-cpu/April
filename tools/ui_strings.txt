@@ -1,0 +1,1102 @@
+
+        end
+        if t.ring_id and not M.BY_ID[t.ring_id] then
+            M.BY_ID[t.ring_id] = 
+
+        end
+    end
+end
+
+register_esp_toggles(esp_maps.WORLD_TOGGLES, 
+
+    end
+    if item.type == 
+
+                if btr_crates > 0 then
+                    meta = tostring(btr_crates) .. 
+
+        end
+
+        rows[#rows + 1] = {
+            name = entry.label or entry.username or 
+
+        if #name > max_name then name = name:sub(1, math.max(1, max_name - 2)) .. 
+
+        if #role > max_name then role = role:sub(1, math.max(1, max_name - 2)) .. 
+
+    elseif manip_on and manip_state == 
+
+    end
+
+    local w1 = theme.text_w(
+
+    for word in text:gmatch(
+
+    if manip_on and info.radii_total and info.radius_idx then
+        ring_text = string.format(
+
+    if text == 
+
+end
+
+local function is_btr_crate(inst)
+    local name = model_name(inst)
+    return name == 
+ .. (btr_crates > 1 and 
+ .. M.vk_name(vk) .. 
+ .. label:lower() .. 
+ .. slash_var
+    end
+
+    local variant = piece.variant
+    if variant and variant ~= 
+ .. t.label .. 
+ .. tostring(April.version or 
+ .. tostring(ws_addr) .. 
+ .. word)
+        if text_w(test, fs) > max_w and line ~= 
+ Range Ring
+ active  |  
+ and minv < 0 and text == 
+ and not text:find(
+ and shown or 
+ and variant ~= 
+ and word or (line .. 
+ crate
+ end
+        draw.text(x + pad, ry + 1, name, theme.TEXT, 12)
+
+        local role = row.role or 
+ end
+    if vk == 0xBE or vk == 0x6E then return 
+ end
+    local min = math.floor(sec / 60)
+    sec = sec % 60
+    if min < 60 then return string.format(
+ end
+    return nil
+end
+
+local function slider_char_allowed(text, ch, is_float, minv)
+    if ch:match(
+ on 
+ or 
+ or (name:find(
+ or item.type == 
+ or text == 
+ then
+        return 
+ then
+        return label .. 
+ then
+        return tip .. 
+ then
+        M.text(text_x, text_y, 
+ then
+        return name .. 
+ then
+        ring_text = 
+ then return nil end
+
+    if item.type == 
+ then return nil end
+
+    name = text_util.sanitize(name)
+    local base, slash_var = name:match(
+ then return p.display_name end
+    return p.name or 
+ then return true end
+    if is_float and ch == 
+ },
+            }),
+            sl(
+ }, 0),
+            combo(
+ }, { false, false }, 
+%.2f (ext)
+(no configs)
+)
+
+local function clean_label(label)
+    label = tostring(label or 
+)
+    label = label:gsub(
+)
+    return label
+end
+
+local function fallback_tip(item)
+    local label = clean_label(item.label)
+    if label == 
+)
+register_esp_toggles(esp_maps.BASE_TOGGLES, 
+)
+register_esp_toggles(esp_maps.LOOT_TOGGLES, 
+)
+                end
+            elseif loot_ready then
+                meta = 
+)
+        if #meta > 48 then meta = meta:sub(1, 46) .. 
+)
+    else
+        shown = string.format(fmt, val)
+    end
+    local vw = text_w(shown ~= 
+)
+    if base and slash_var then
+        return base .. 
+)
+    if max_w <= 0 or text_w(str, size) <= max_w then return str end
+    local suffix = 
+)
+    local fire = find_child(main, 
+)
+    local lines = {}
+    local line = 
+)
+    local val = tostring(state.get(id, default or 
+)
+    return label
+end
+
+local function collect_rows()
+    local rows = {}
+    local only_active = settings.bool(
+)
+    return tostring(pid) .. 
+) * 7
+end
+
+function M.init()
+    state.define(
+) == true then return true end
+    if env.get_attribute(model, 
+) == true then return true end
+    local main = find_child(model, 
+) do
+        local test = line == 
+) end
+    label = label:gsub(
+) or 
+) then return true end
+    if ch == 
+)) * 7
+end
+
+local function fit_text(str, max_w, size)
+    str = tostring(str or 
+),
+            btn(
+),
+            cb(
+),
+            color(
+),
+            combo(
+),
+            multi(
+),
+            sep(
+),
+            sep(),
+            label(
+),
+            sl(
+),
+        },
+    }
+
+    local colors = {
+        title = 
+):lower()
+    if n:find(
+):match(
+,
+
+    -- Aimbot options
+    april_aim_targets = 
+,
+
+    -- Config / actions
+    april_ui_startup_intro = 
+,
+
+    -- GPU mesh chams (exploits preset indices — see docs/API.md §15)
+    april_world_chams = 
+,
+
+    -- Gun mods
+    april_gunmods_enabled = 
+,
+
+    -- Movement
+    april_fly_enabled = 
+,
+
+    -- Radar
+    april_map_enabled = 
+,
+
+    -- Silent aim options
+    april_silent_targets = 
+,
+
+    -- Utility
+    april_autofarm = 
+,
+
+    -- Visuals
+    april_player_enabled = 
+,
+
+    -- World masters
+    april_world_enabled = 
+,
+
+    april_world_boxes = 
+,
+                },
+            }),
+            color(
+,
+            }, 0),
+            cb(
+,
+            }, { false, true, false }, 
+,
+            }, { true, false, true, true, false, true }),
+            input(
+,
+        items = {
+            color(
+,
+        items = {
+            kb(
+,
+        master = 
+,
+    april_aim_auto_pred = 
+,
+    april_aim_bone = 
+,
+    april_aim_filters = 
+,
+    april_aim_humanize = 
+,
+    april_aim_humanize_str = 
+,
+    april_aim_smooth = 
+,
+    april_aim_smooth_type = 
+,
+    april_aim_sticky = 
+,
+    april_aim_whitelist_clear = 
+,
+    april_aim_whitelist_ids = 
+,
+    april_anime_baddie_character = 
+,
+    april_anime_baddie_cooldown = 
+,
+    april_anime_baddie_duration = 
+,
+    april_anime_baddie_enabled = 
+,
+    april_anime_baddie_events = 
+,
+    april_anime_baddie_opacity = 
+,
+    april_anime_baddie_personality = 
+,
+    april_anime_baddie_preview = 
+,
+    april_anime_baddie_reset = 
+,
+    april_anime_baddie_scale = 
+,
+    april_anime_baddie_stay = 
+,
+    april_anti_afk = 
+,
+    april_antiaim_enabled = 
+,
+    april_antifling_enabled = 
+,
+    april_autofarm_debug_path = 
+,
+    april_autofarm_resources = 
+,
+    april_autofarm_search_range = 
+,
+    april_base_boxes = 
+,
+    april_base_chams = 
+,
+    april_base_chams_color = 
+,
+    april_base_chams_mode = 
+,
+    april_base_enabled = 
+,
+    april_base_show_distance = 
+,
+    april_base_show_name = 
+,
+    april_base_xray_enabled = 
+,
+    april_base_xray_range = 
+,
+    april_bhop_enabled = 
+,
+    april_bullet_body_peek = 
+,
+    april_cfg_autoload = 
+,
+    april_cfg_autoload_config = 
+,
+    april_cfg_delete = 
+,
+    april_cfg_load = 
+,
+    april_cfg_profile_name = 
+,
+    april_cfg_refresh = 
+,
+    april_cfg_save = 
+,
+    april_cfg_selected = 
+,
+    april_crosshair_enabled = 
+,
+    april_crosshair_follow = 
+,
+    april_desync_enabled = 
+,
+    april_event_status_active_only = 
+,
+    april_event_status_enabled = 
+,
+    april_fakeduck_enabled = 
+,
+    april_farm_helper = 
+,
+    april_fling_enabled = 
+,
+    april_fly_noclip = 
+,
+    april_gm_double_tap = 
+,
+    april_gm_fire_rate = 
+,
+    april_gm_range = 
+,
+    april_gm_recoil = 
+,
+    april_gm_speed = 
+,
+    april_gm_spread = 
+,
+    april_gm_sway = 
+,
+    april_keybinds_enabled = 
+,
+    april_loot_boxes = 
+,
+    april_loot_chams = 
+,
+    april_loot_chams_color = 
+,
+    april_loot_chams_mode = 
+,
+    april_loot_enabled = 
+,
+    april_loot_show_distance = 
+,
+    april_loot_show_name = 
+,
+    april_map_opacity = 
+,
+    april_map_reset_position = 
+,
+    april_mod_checker_enabled = 
+,
+    april_npc_attack_heli = 
+,
+    april_npc_boris = 
+,
+    april_npc_bruno = 
+,
+    april_npc_brutus = 
+,
+    april_npc_btr = 
+,
+    april_npc_diver_dave = 
+,
+    april_npc_enabled = 
+,
+    april_npc_pilot_pete = 
+,
+    april_npc_soldier = 
+,
+    april_player_esp_filters = 
+,
+    april_player_esp_flags = 
+,
+    april_player_show_held = 
+,
+    april_raid_enabled = 
+,
+    april_raid_notifications = 
+,
+    april_reload_modules = 
+,
+    april_silent_bone = 
+,
+    april_silent_bullet_manip = 
+,
+    april_silent_bullet_tp = 
+,
+    april_silent_filters = 
+,
+    april_silent_hit_chance = 
+,
+    april_silent_hitscan = 
+,
+    april_silent_manip_extend = 
+,
+    april_silent_sticky = 
+,
+    april_silent_whitelist_clear = 
+,
+    april_silent_whitelist_ids = 
+,
+    april_spider_enabled = 
+,
+    april_target_overlay = 
+,
+    april_target_overlay_fov = 
+,
+    april_target_overlay_max_dist = 
+,
+    april_thick_bullet = 
+,
+    april_thick_bullet_mult = 
+,
+    april_ui_crosshair_motion = 
+,
+    april_ui_crosshair_options = 
+,
+    april_ui_menu_key = 
+,
+    april_ui_menu_overlay = 
+,
+    april_ui_npc_elements = 
+,
+    april_ui_npc_types = 
+,
+    april_ui_player_elements = 
+,
+    april_ui_radar_layers = 
+,
+    april_ui_snow = 
+,
+    april_waypoints_enabled = 
+,
+    april_world_chams_color = 
+,
+    april_world_chams_mode = 
+,
+    april_world_show_distance = 
+,
+    april_world_show_name = 
+,
+    april_wp_clear = 
+,
+    april_wp_clear_all = 
+,
+    april_wp_set = 
+,
+}
+
+local FILTER_TIPS = {
+    
+,
+}
+
+local HITBOX_TIPS = {
+    
+,
+}
+
+local SMOOTH_TIPS = {
+    
+,
+}
+
+local TARGET_TIPS = {
+    
+,
+}
+
+local TARGET_TYPE_TIPS = {
+    
+,
+    [0x30] = 
+,
+    [0x35] = 
+,
+    [0xBA] = 
+,
+    [0xBF] = 
+,
+    [0xDE] = 
+,
+}
+
+local INPUT_PLAIN = {
+    [0x20] = 
+, 0, 20, 5, false, 
+, 0.1, 1, 1, true, 
+, 1, 10, 2, false, 
+, 1, 100, 10, false, 
+, 1, 100, 100),
+            sl(
+, 1, 100, 35, false, 
+, 1, 100, 40, false, 
+, 1, 25, 10),
+            combo(
+, 1, 4, 2, true, 
+, 1, 50, 10, false, 
+, 1, 7, 7, true, 
+, 1, true)
+        or n:find(
+, 1, true) or n:find(
+, 1, true) then
+        return 1
+    end
+    if n:find(
+, 1, true) then
+        return 2
+    end
+    if n:find(
+, 1, true) then
+        return 3
+    end
+    if n:find(
+, 1, true) then
+        return 4
+    end
+    if n:find(
+, 1, true) then
+        return 5
+    end
+    if n:find(
+, 1, true) ~= nil)
+end
+
+local function crate_locked(model)
+    if env.get_attribute(model, 
+, 10) + 24
+    local w2 = theme.text_w(
+, 10) + 24
+    local w3 = theme.text_w(
+, 10) + theme.text_w(
+, 10) + theme.text_w(fire_label, 10) + 24
+    local w5 = theme.text_w(
+, 10) + theme.text_w(manip_label, 10) + 24
+    local w4 = theme.text_w(
+, 10) + theme.text_w(radius_text, 10) + 24
+    local w6 = theme.text_w(
+, 4, 40, 18, false, 
+, 5, 600, 120),
+            sep(),
+            cb(
+, 5, 600, 150),
+            sep(),
+            cb(
+, 50, 2000, 500),
+            sep(),
+            cb(
+, 8, 24, 13),
+            btn(
+, [0x31] = 
+, [0x32] = 
+, [0x33] = 
+, [0x34] = 
+, [0x36] = 
+, [0x37] = 
+, [0x38] = 
+, [0x39] = 
+, [0xBB] = 
+, [0xBC] = 
+, [0xBD] = 
+, [0xBE] = 
+, [0xC0] = 
+, [0xDB] = 
+, [0xDC] = 
+, [0xDD] = 
+, combat_menu.AIM_AT_OPTIONS, combat_menu.AIM_AT_DEFAULTS),
+            multi(
+, combat_menu.SILENT_BONES, 0),
+            multi(
+, false)
+    local show_unbound = settings.bool(
+, false)
+    state.define(
+, false),
+            cb(
+, false),
+            sep(
+, false),
+            sep(),
+            cb(
+, false),
+            sl(
+, false, nil, 
+, false, nil, { hide_color = true }),
+            sep(),
+            combo(
+, false, { 0.2, 1, 0.45, 1 }),
+            combo(
+, false, { 0.2, 1, 0.45, 1 }),
+        },
+    }
+
+    local silent = {
+        title = 
+, false, { 0.55, 0.2, 1, 1 }),
+            combo(
+, false, { 1, 0.25, 0.25, 1 }),
+        },
+    }
+
+    local bullet = {
+        title = 
+, gate = gate }
+end
+
+local function ak(key_id, label, gate)
+    return { type = 
+, id = key_id, mode_id = key_id .. 
+, info.radius_idx, info.radii_total)
+    elseif manip_on and manip_state == 
+, label = label, gate = gate }
+end
+
+local function hk(id, label, gate, default_vk)
+    return { type = 
+, min, sec) end
+    local hr = math.floor(min / 60)
+    min = min % 60
+    return string.format(
+, true)
+    local show_mode = settings.bool(
+, true),
+            sl(
+, {
+                sync_ids = {
+                    
+, {
+                sync_ids = { 
+, { 0.35, 0.85, 1, 1 }),
+            color(
+, { 0.45, 1, 0.55, 1 }),
+            color(
+, { 0.75, 0.85, 1, 1 }),
+            color(
+, { 0.82, 0.84, 0.88, 0.92 }),
+            sep(),
+            color(
+, { 0.84, 0.31, 0.80, 1 }),
+            color(
+, { 0.95, 0.9, 0.55, 0.95 }),
+            color(
+, { 1, 0.33, 0.33, 1 }),
+            color(
+, { 1, 0.35, 0.35, 1 }),
+            color(
+, { 1, 0.82, 0.2, 1 }),
+            color(
+, { 1, 1, 1, 0.92 }),
+            color(
+2D
+:option:
+ACTIVE
+AVAILABLE
+Accent Colors
+Accent Speed
+Accent Style
+Adds a small dot at the exact screen center.
+Advanced Animation
+Aim At
+Aim Key
+Allows Autofarm to harvest tree models. Equip an axe, hatchet, chainsaw, or compatible hybrid tool.
+Allows Autofarm to mine Metal_Node models. Equip a pickaxe, mining drill, or compatible hybrid tool.
+Allows Autofarm to mine Phosphate_Node models. Equip a pickaxe, mining drill, or compatible hybrid tool.
+Allows Autofarm to mine Stone_Node models. Equip a pickaxe, mining drill, or compatible hybrid tool.
+Also toggled from the top dock.
+Amber Noir
+Ambient Fade Pulse
+Anime Baddie
+Anti AFK
+Anti Fling
+Anti-Aim
+Arctic Frost
+Attack Heli
+Auto Turret
+Autoload Config Name
+Autoload on Start
+Automatically uses the valid body part closest to your crosshair.
+BTR
+BTR Crate
+BULLET STATUS
+Base 3D Boxes
+Base Cabinet
+Base ESP
+Base Parts
+Base Range
+Base Show Distance
+Base Show Name
+Base Xray
+BasePart
+Beacon Height
+Beacon Pillar
+Blueberry Plant
+Body Bag
+Border Strength %
+Bubble Duration
+Bullet Speed
+Bullet TP
+Bunny Hop
+COLOR
+Care Package
+Center Dot
+Cham Types
+Chams Mode
+Chatter Cooldown
+Clan Tag
+Clear Active Waypoint
+Clear All Waypoints
+Clear LOS
+Combat / Bleed
+Config Name
+Continuously rotates the visual while enabled.
+Copper Dust
+Copy Color
+Corn Plant
+Crimson Ember
+Cursor Dot
+Custom Colors
+Custom Crosshair
+Cycles the visual through rainbow colors.
+DESTROYED
+Death / Respawn
+Debug Target Path
+Delete Config
+Desync Visualize
+Disables this visual or selection.
+Displayed Elements
+Diver Dave
+Double Tap
+Downed / Revived
+Draw Markers
+Draws a translucent filled circle with an outline.
+Draws lines between the target's body joints.
+Draws only the outside edge.
+Dropped Items
+Duck Height
+ESP Filters
+ESP Flags
+EVENT STATUS
+EVENTS
+Emerald Glass
+Enable Aimbot
+Enable Binds, Staff, Events, Map, or April above.
+Enable Gun Mods
+Enable Snow
+Event Status
+Failed: 
+Fake Duck
+Farm Range (studs)
+Farm Resources
+Fill Glow
+Filled Circle
+Fire Rate
+Fire Rate Multiplier
+Fling Duration
+Fling FOV
+Fly Noclip
+Fly Speed
+Follows Silent Aim's current target.
+Follows the regular camera Aimbot's current target.
+Food Crate
+Garage Door
+Gear FOV
+Gear Icon Size
+Glow Preset
+GuiHolder
+Gun Mods
+Gun Range
+HUD SETTINGS
+HUD panels are managed from the top dock.
+Health Bar
+Health Check
+Held Item
+Heli Crate
+Hide from keybind list
+Highlights 
+Hold or toggle this key to activate aimbot.
+INACTIVE
+Jitter Interval (ms)
+Jitter Step
+KEYBIND SETTINGS
+KEYBINDS
+Keeps the current target locked according to that aim system's sticky rules.
+Keybind Viewer
+Keybinds Display
+LOOT CD
+LOOT READY
+Large Battery
+Large Box
+Large Cabinet
+Large Egg
+Large Egg / Gift
+Large Gift
+Large Storage Box
+Left Arm
+Left Leg
+Lemon Plant
+Load Config
+Loading 
+Loading modules
+Locked Metal Crate
+Locked Steel Crate
+Locked Wooden Crate
+Loot 3D Boxes
+Loot ESP
+Loot Range
+Loot Show Distance
+Loot Show Name
+Loot fire  
+Low Health
+MAP
+Made by Cunzaki
+Main Accent
+Manip Peek
+Manual Farm Helper
+Manual Yaw
+Max Distance
+Medium Battery
+Medium Egg
+Medium Egg / Gift
+Medium Gift
+Menu Overlay
+Menu Toggle Key
+Mesh Chams (GPU)
+Metal Crate
+Metal Door
+Metal Double Door
+Metal Node
+Metal_Node
+Midnight Blue
+Military Boat
+Mod Checker
+Mod Checker Scan
+Motion Profile
+NPC Box
+NPC Colors
+NPC ESP
+NPC Range
+NPC Types
+NPCs
+Nearby Threats
+Neon Lime
+No Peek
+No Recoil
+No Spread
+No Sway
+No active events
+No binds
+No gear detected
+No staff detected
+OFF
+ON
+Ocean Abyss
+Oil Barrel
+Only Show Active
+Only Show Active Events
+Only active binds
+Only active events
+Overlay Panels
+Overlay Strength
+Override For
+PREFAB_ANIMAL_DEER
+PREFAB_ANIMAL_WILDBOAR
+PREFAB_ANIMAL_WOLF
+Panel Opacity %
+Paste Color
+Peek R
+Peek Ready
+Per-Element Styles
+Phosphate Node
+Phosphate_Node
+Picks a random body part from head, torso, arms, and legs. Re-rolls every shot while Mouse 1 is held.
+Pilot Pete
+Player Box
+Player ESP
+Player Range
+Preview Line
+Pulse Size
+Pumpkin Plant
+Radar Base Color
+Radar Blip Size
+Radar Loot Color
+Radar NPCs Color
+Radar Opacity
+Radar Players Color
+Radar Raids Color
+Radar Resources Color
+Radar Size
+Radar Waypoints Color
+Radar Zoom Level
+Raid ESP
+Raid ESP Range
+Raid Notifications
+Random Jitter
+Randomized Part
+Range Mult
+Raspberry Plant
+React To
+Recoil Reduction %
+Redirects shots to your locked target without moving the camera.
+Reduce Motion
+Refresh List
+Reset Position
+Reset Radar Position
+Reset map position
+Resource 3D Boxes
+Resource ESP
+Resource Range
+Resource Show Distance
+Resource Show Name
+Right Arm
+Right Leg
+Royal Indigo
+STAFF
+STAFF IN LOBBY
+Safe Zone
+Sakura Night
+Salvaged Flycopter
+Salvaged Metal Door
+Save Config
+Saved Configs
+Scan Interval (ms)
+Scan interval
+Search Range
+Section Tops
+Set Active Waypoint
+Shotgun Turret
+Show Bind Mode
+Show Unbound
+Show bind mode
+Show unbound
+Shows how far away the target is.
+Shows the item or weapon the target currently has equipped.
+Shows the player's VIP status when available.
+Shows the staff/moderator status detected for a player.
+Shows the target's clan tag when available.
+Shows the target's current health as a bar.
+Shows the target's display name.
+Shows useful movement-state information.
+Shows when a player is knocked down.
+Shows when a player is protected by a safezone.
+Shows when a player is reviving someone.
+Sideways Left
+Sideways Right
+Skip Downed
+Skip Safezone
+Sleeping Bag
+Small Battery
+Small Box
+Small Egg
+Small Egg / Gift
+Small Gift
+Small Storage Box
+Smooth camera aim assist on your current target. Bind a key on the chip (Always / Hold / Toggle).
+Smoothly grows and shrinks the visual.
+Solar Panel
+Spam Height
+Spam Interval (ms)
+Spam Max
+Spam Min
+Spam Mode
+Speed Mult
+Spider Speed
+Spin Speed
+Spread Reduction %
+Startup Animation
+Stay Visible
+Steel Crate
+Steel Door
+Steel Double Door
+Sticky Aim
+Sticky Target
+Stone Node
+Stone_Node
+Storage Cabinet
+Survival Needs
+T-Shape
+TARGET LOADOUT
+Tactical Map
+Target Gear
+Target Gear Overlay
+Target Type
+Team Check
+TextLabel
+Theme Preset
+Timed Crate
+Title Bar
+Tomato Plant
+Top Offset
+Trap Door
+Trash Can
+Triangle Trap Door
+UI Scale %
+Uses the first enabled combat system with a valid target.
+VIP
+Violet Glass
+Visible Layers
+Visible Only
+Waypoint Active Slot
+Waypoint Show Distance
+Whitelist IDs
+Wild Boar
+WildBoar
+Window Opacity %
+Wireframe Glow
+Wooden Boat
+Wooden Crate
+Wooden Door
+Wooden Double Door
+Wool Plant
+World Events
+Xray Range
+Yaw Mode
+button:
+can't close
+check-hover:
+check-state:
+column-scroll:
+combo:
+double buffer
+group-expand:
+group-header:
+hud-dock:
+hud-dock:settings
+input:
+multi:
+slider-active:
+slider-hover:
+tab:
