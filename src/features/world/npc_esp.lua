@@ -1,17 +1,45 @@
+You replace **the entire `npc_esp.lua` file** with the rewrite. That's the only file that changes.
+
+But my previous message got cut off mid-file. Here's the **complete, final `npc_esp.lua`** — paste this over your existing one in full:
+
+```lua
 local settings = April.require("core.settings")
 local cache = April.require("core.cache")
 local draw_util = April.require("core.draw_util")
 local esp_util = April.require("core.esp_util")
 local env = April.require("core.env")
 local menu_util = April.require("core.menu_util")
+local esp_scan = April.require("game.esp_scan")
 local npcs = April.require("game.npcs")
 
 local M = {}
 local P = "april_npc_enabled"
 local HP_TTL_MS = 250
 
+cache.npcs = cache.npcs or {}
+
 local function tick_ms()
     return utility and utility.get_tick_count and utility.get_tick_count() or 0
+end
+
+-- Map toggle ids -> kind used by the draw table, so entries built either by an
+-- external scanner (entry.toggle_id) or by this module (entry.kind) both work.
+local TOGGLE_TO_KIND = {
+    april_npc_soldier     = "soldier",
+    april_npc_bruno       = "bruno",
+    april_npc_boris       = "boris",
+    april_npc_brutus      = "brutus",
+    april_npc_attack_heli = "heli",
+    april_npc_btr         = "btr",
+    april_npc_diver_dave  = "diver_dave",
+    april_npc_pilot_pete  = "pilot_pete",
+}
+
+local function entry_kind(entry)
+    if not entry then return nil end
+    if entry.kind then return entry.kind end
+    if entry.toggle_id then return TOGGLE_TO_KIND[entry.toggle_id] end
+    return nil
 end
 
 local function migrate_legacy_types()
@@ -74,166 +102,35 @@ function M.register_menu()
     })
 end
 
-local function entity_bounds(player)
-    if not player then return nil end
-    local fn = player.GetBounds or player.get_bounds
-    if not fn then return nil end
-    return fn(player)
-end
+-- ---------------------------------------------------------------------------
+-- Self-contained NPC scanning -> cache.npcs
+--
+-- Walks the workspace NPC roots one child at a time via the shared
+-- incremental_scan budget. Uses npcs.classify if game.npcs provides it, else
+-- falls back to a name-keyword matcher so entries still populate.
+-- ---------------------------------------------------------------------------
 
-local function event_health(entry)
-    local now = tick_ms()
-    if entry.hp_t and now - entry.hp_t < HP_TTL_MS then
-        return entry.hp, entry.max_hp
-    end
-    local health = npcs.read_health(entry.inst, entry.humanoid)
-    entry.hp_t = now
-    entry.hp = health and health.hp or nil
-    entry.max_hp = health and (health.max_hp or health.hp) or nil
-    return entry.hp, entry.max_hp
-end
+local NPC_ROOT_NAMES = {
+    NPCs = true,
+    Npcs = true,
+    npcs = true,
+    NPCS = true,
+    Enemies = true,
+    Enemy = true,
+    Mobs = true,
+    Animals = true,
+    Wildlife = true,
+}
 
-local function event_bounds(entry, dist)
-    if not entry.root or not env.is_valid(entry.root) then return nil end
-    local x, y, z = esp_util.vec3_pos(entry.root.Position or entry.root.position)
-    if not x then return nil end
-    entry.lx, entry.ly, entry.lz = x, y, z
-    local vehicle = entry.vehicle == true
-    return esp_util.head_body_screen_bounds(x, y, z, {
-        dist = dist,
-        body_h = vehicle and 8.0 or 5.0,
-        width_mul = vehicle and 1.15 or 0.52,
-        top_pad = vehicle and 2.0 or 0.35,
-        bot_pad = vehicle and 2.0 or 0.15,
-    })
-end
-
-function M.draw()
-    migrate_legacy_types()
-    if not settings.enabled(P) then return end
-
-    local list = cache.npcs
-    if not list or #list == 0 then return end
-
-    local range = settings.num("april_npc_range", 500)
-    local range_sq = range * range
-    local box_mode = settings.num("april_npc_box_mode", 1)
-    local show_health = settings.bool("april_npc_health", true)
-    local show_name = settings.bool("april_npc_show_name", true)
-    local show_dist = settings.bool("april_npc_show_distance", true)
-    local enabled = {
-        soldier = settings.bool("april_npc_soldier", false),
-        bruno = settings.bool("april_npc_bruno", false),
-        boris = settings.bool("april_npc_boris", false),
-        brutus = settings.bool("april_npc_brutus", false),
-        heli = settings.bool("april_npc_attack_heli", false),
-        btr = settings.bool("april_npc_btr", false),
-        diver_dave = settings.bool("april_npc_diver_dave", false),
-        pilot_pete = settings.bool("april_npc_pilot_pete", false),
-    }
-    if not (enabled.soldier or enabled.bruno or enabled.boris or enabled.brutus
-        or enabled.heli or enabled.btr or enabled.diver_dave or enabled.pilot_pete)
-    then
-        return
-    end
-
-    local colors = {
-        soldier = settings.color("april_npc_soldier", { 1, 0.3, 0.3, 1 }),
-        bruno = settings.color("april_npc_bruno", { 1, 0.65, 0.2, 1 }),
-        boris = settings.color("april_npc_boris", { 0.78, 0.42, 1, 1 }),
-        brutus = settings.color("april_npc_brutus", { 1, 0.3, 0.48, 1 }),
-        heli = settings.color("april_npc_attack_heli", { 0.85, 0.2, 0.25, 1 }),
-        btr = settings.color("april_npc_btr", { 0.95, 0.25, 0.15, 1 }),
-        diver_dave = settings.color("april_npc_diver_dave", { 0.2, 0.75, 1, 1 }),
-        pilot_pete = settings.color("april_npc_pilot_pete", { 0.35, 1, 0.65, 1 }),
-    }
-    local col_name = settings.color("april_npc_show_name", { 1, 0.3, 0.3, 1 })
-    local col_dist = settings.color("april_npc_show_distance", { 0.82, 0.84, 0.88, 0.92 })
-
-    local text_size = esp_util.text_size()
-    local me = cache.local_player or env.get_local_player()
-    local mx, my, mz = nil, nil, nil
-    if me then
-        mx, my, mz = esp_util.vec3_pos(me.Position or me.position)
-    end
-
-    for i = 1, #list do
-        local entry = list[i]
-        if not entry then goto continue end
-        if not enabled[entry.kind] then goto continue end
-
-        local col = colors[entry.kind] or colors.soldier
-
-        local player = entry.entity
-        if player and (player.IsAlive == false or player.is_alive == false) then goto continue end
-        if not player and (not entry.inst or not env.is_valid(entry.inst)) then goto continue end
-
-        local lx, ly, lz
-        if player then
-            lx, ly, lz = esp_util.vec3_pos(
-                player.HeadPosition or player.head_position or player.Position or player.position
-            )
-            if lx then entry.lx, entry.ly, entry.lz = lx, ly, lz end
-        else
-            lx, ly, lz = entry.lx, entry.ly, entry.lz
-        end
-        if not lx then goto continue end
-
-        local dist = 0
-        if mx then
-            local dx = lx - mx
-            local dy = ly - my
-            local dz = lz - mz
-            local dist_sq = dx * dx + dy * dy + dz * dz
-            if dist_sq > range_sq then goto continue end
-            dist = math.sqrt(dist_sq)
-        end
-
-        local bounds = player and entity_bounds(player) or event_bounds(entry, dist)
-        if not esp_util.bounds_usable(bounds) then goto continue end
-
-        local ts = text_size
-        if dist > 200 then ts = math.max(9, ts - 1) end
-        if dist > 400 then ts = math.max(8, ts - 1) end
-
-        local cx = bounds.x + bounds.w * 0.5
-        local label = entry.name or "NPC"
-
-        if show_name then
-            draw_util.text_centered(cx, bounds.y - ts - 5, label, col_name, ts)
-        end
-
-        if box_mode == 1 then
-            draw_util.box_esp(bounds.x, bounds.y, bounds.w, bounds.h, col, 0)
-        elseif box_mode == 2 then
-            draw_util.box_esp(bounds.x, bounds.y, bounds.w, bounds.h, col, 1)
-        end
-
-        if show_health then
-            local hp, max_hp
-            if player then
-                hp = tonumber(player.Health or player.health)
-                max_hp = tonumber(player.MaxHealth or player.max_health)
-            else
-                hp, max_hp = event_health(entry)
-            end
-            if hp and max_hp then
-                draw_util.health_bar_on_box(bounds, hp, max_hp)
-            end
-        end
-
-        if show_dist and mx then
-            draw_util.text_centered(
-                cx,
-                bounds.y + bounds.h + 3,
-                string.format("%dm", math.floor(dist + 0.5)),
-                col_dist,
-                ts
-            )
-        end
-
-        ::continue::
-    end
-end
-
-return M
+local NPC_KEYWORDS = {
+    { "brutus",   "brutus",      "Brutus" },
+    { "bruno",    "bruno",       "Bruno" },
+    { "boris",    "boris",       "Boris" },
+    { "attackheli", "heli",      "Attack Heli" },
+    { "heli",     "heli",        "Attack Heli" },
+    { "btr",      "btr",         "BTR" },
+    { "diverdave","diver_dave",  "Diver Dave" },
+    { "diver",    "diver_dave",  "Diver Dave" },
+    { "pilotpete","pilot_pete",  "Pilot Pete" },
+    { "pilot",    "pilot_pete",  "Pilot Pete" },
+    { "soldier",  "soldier",     "Soldier"
